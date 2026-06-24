@@ -38,6 +38,7 @@ If the request doesn't match one of these, ask: "Is this clear enough to write a
 
 | When working on... | Load |
 |---|---|
+| Where a new file/feature belongs (FSD layer/slice/segment) | `reference/architecture/feature-sliced-design.md` |
 | Frontend / UI | `reference/ui-patterns.md` |
 | API endpoints | `reference/api-conventions.md` |
 | Database schema | `reference/data-model.md` |

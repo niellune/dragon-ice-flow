@@ -25,6 +25,10 @@ Before any file write: follow `.context/task-workflow.md`. Refactors are *especi
 - Move file to better location
 - Replace prose comment with better names
 
+## FSD Boundaries
+
+Refactors of `src/` must **preserve Feature-Sliced Design boundaries**: don't introduce upward or sibling-slice imports, and keep each slice's public API behind its `index` barrel. "Move file to better location" means move it to the correct **layer/slice/segment** — see `reference/architecture/feature-sliced-design.md`.
+
 ## Rule of Three
 
 Don't deduplicate until you see the same pattern three times. Two occurrences may be coincidence; three is a pattern.

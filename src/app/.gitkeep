@@ -1,0 +1,1 @@
+# app — composition root: providers, router, global styles/store init. No business slices.

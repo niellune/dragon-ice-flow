@@ -40,7 +40,7 @@
 
 **`wiki/`** — LLM-maintained knowledge: `index.md`, `log.md`, `entities/`, `concepts/`, `sources/`
 
-**`src/`** — your actual code
+**`src/`** — your actual code. Frontend is organized by **Feature-Sliced Design** (`app → pages → widgets → features → entities → shared`); spec in `reference/architecture/feature-sliced-design.md`
 
 ## Routing Rule
 
@@ -56,6 +56,7 @@ Every fact lives in exactly one file. Other files point to it; they never copy i
 - Hard rules → `.context/rules.md`
 - Domain terms → `.context/glossary.md`
 - Project decisions, project-specific patterns → `reference/`
+- Frontend architecture (Feature-Sliced Design) → `reference/architecture/feature-sliced-design.md`
 - Accumulated knowledge from external sources → `wiki/`
 
 ## Authority Boundary

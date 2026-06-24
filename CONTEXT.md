@@ -25,6 +25,7 @@ Workspaces frame a whole task. Skills are invoked briefly within one, then you r
 | Anything touching auth, payments, or PII | Above row + `.context/rules.md` (sections: security, compliance) |
 | Writing user-facing copy | `.context/identity.md` (sections: voice, tone) |
 | Naming things / API design | `.context/glossary.md` |
+| Deciding where code goes — which layer/slice/segment a file belongs in | `reference/architecture/feature-sliced-design.md` |
 
 ## Wiki Integration Rules
 
