@@ -63,6 +63,17 @@ Multi-task:
 - Failed task → fix before next.
 - After: run `<verify>`, commit (one task = one commit), move to `TaskList.md ## Done`, update `STATE.md` if state changed, append to `wiki/log.md` if notable decision.
 
+## Enforcement (hook)
+
+The code gate is enforced mechanically by a PreToolUse hook (`.claude/hooks/gate-check.ps1`, registered in `.claude/settings.json`): `Edit`/`Write` to `src/`, `reference/`, or `.context/` is blocked unless the sentinel file `.claude/gate-open` exists.
+
+Sentinel lifecycle:
+1. User approves the XML task → create the sentinel: `echo approved > .claude/gate-open`
+2. Execute the task, verify, commit.
+3. Delete the sentinel: `rm .claude/gate-open` (or `Remove-Item`). Never leave it open between tasks.
+
+The sentinel is gitignored. If the hook blocks a write you believe is exempt, check the "Which Gate Covers What" table — bookkeeping files are outside the gated paths by design.
+
 ## More
 
 Red flags, state-vs-log boundaries, when this doesn't apply, after-task checklist details → `.context/task-workflow-appendix.md` (load when needed).

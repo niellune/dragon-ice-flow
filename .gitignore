@@ -58,3 +58,6 @@ env/
 .turbo/
 .tmp/
 tmp/
+
+# XML task gate sentinel (created on task approval, deleted after commit)
+.claude/gate-open
