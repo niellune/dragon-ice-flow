@@ -4,11 +4,25 @@
 
 ## The Gate
 
-No `Edit`/`Write` before user approval of an XML task. Reads are free.
+No `Edit`/`Write` on a gated surface before user approval of the matching gate (table below). Reads are free.
 
 The gate fires whether the conversation has been plain or structured. If the conversation has been plain prose, the XML task still appears — Claude doesn't suppress the wrapper to keep the conversation "light." A brief plain intro before the XML is fine; the XML itself is non-negotiable.
 
-**Scope:** `src/`, `reference/`, `.context/`. Other gates: the planning gate (`<planning-task>`) protects `planning/` (see `workspaces/planning/CONTEXT.md`); the ingest gate (`<ingest>`) protects `wiki/` writes (see `workspaces/research/CONTEXT.md`). The `<brainstorm>` wrapper in `skills/brainstorm/SKILL.md` is a declaration, not a gate.
+## Which Gate Covers What
+
+**This table is canonical.** Other files point here; they never restate scope.
+
+| Surface | Gate | Defined in |
+|---|---|---|
+| `src/`, `reference/`, `.context/` | `<task>` / `<plan>` | this file |
+| `planning/` | `<planning-task>` | `workspaces/planning/CONTEXT.md` |
+| `wiki/` (multi-page: ingest, lint fixes) | `<ingest>` | `workspaces/research/CONTEXT.md` |
+| `wiki/` (single-page query filing) | One-line confirmation | `workspaces/research/CONTEXT.md` |
+| `STATE.md`, `TaskList.md`, `wiki/log.md`, index files | **Exempt** — bookkeeping required by an already-approved task | — |
+
+The exemption covers only the bookkeeping an approved task's checklist demands (board moves, state updates, log appends, index entries). It is not a side door for content changes.
+
+The `<brainstorm>` wrapper in `skills/brainstorm/SKILL.md` is a declaration, not a gate.
 
 ## Sequence
 

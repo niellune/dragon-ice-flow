@@ -7,7 +7,7 @@
 
 Planning has its own gate, parallel to the code-write gate in `.context/task-workflow.md`:
 
-- **The code gate** (`task-workflow.md`) protects files in `src/`, `reference/`, `.context/`, and the wiki — anything that runs or instructs Claude.
+- Gate scopes are defined once in `.context/task-workflow.md` → "Which Gate Covers What". In short: the code gate covers `src/`, `reference/`, `.context/`; the wiki has its own `<ingest>` gate.
 - **The planning gate** (this section) protects files in `planning/` — stories, specs, plans.
 - **Both apply** if a single action touches both surfaces (e.g. moving a wiki insight into `reference/` *and* updating a spec).
 
@@ -59,7 +59,7 @@ Captures *what a user wants and why*, before deciding how to build it.
 draft | approved | in-progress | done
 ```
 
-**Full template:** see `planning/stories/_template-full.md` (created on first use; ask the user before generating).
+**Full template:** see `planning/stories/_template-full.md` (ships with the template).
 
 ### 2. Spec → `planning/specs/[slug].md`
 

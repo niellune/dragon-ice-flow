@@ -35,6 +35,6 @@
 - [e.g., No `skip` or `only` in committed test files.]
 
 ## Git / PR Conventions
-- Commit messages: `[workspace-id] short imperative`
+- Commit messages: `[task-id] short imperative` (e.g. `feat-012 add dashboard export button`)
 - One concern per PR.
 - PR description: what changed, why, how tested.

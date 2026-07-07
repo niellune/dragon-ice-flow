@@ -40,7 +40,7 @@ your-project/
 ├── reference/             ← deep docs YOU wrote
 │
 ├── raw/                   ← immutable sources
-└── wiki/                  ← LLM-maintained knowledge (index, log, entities, concepts, sources)
+├── wiki/                  ← LLM-maintained knowledge (index, log, entities, concepts, sources)
 │
 └── src/                   ← your actual code
 ```
@@ -119,7 +119,7 @@ The full ruleset lives in `.context/housekeeping.md`. It's a *proposal* workflow
 ### Structure
 1. **One-Place Rule.** Every fact lives in exactly one file.
 2. **One-Way References.** A → B only, never bidirectional.
-3. **Selective Section Loading.** Load lines 40–120, not whole files.
+3. **Selective Section Loading.** Load the named section, not whole files.
 4. **Routing is not work.** `CONTEXT.md` directs traffic; it doesn't contain answers.
 
 ### Knowledge
@@ -129,7 +129,7 @@ The full ruleset lives in `.context/housekeeping.md`. It's a *proposal* workflow
 8. **The LLM does maintenance.** Humans curate sources; Claude handles bookkeeping.
 
 ### Discipline
-9. **The gate.** No `Edit`/`Write` without an approved XML task. Reads are free.
+9. **The gate.** No writes to a gated surface without approval — `src/`/`reference/`/`.context/` need an XML task; `planning/` and `wiki/` have their own gates; task bookkeeping (`STATE.md`, `TaskList.md`, `wiki/log.md`) is exempt. Canonical table: `.context/task-workflow.md`. Reads are free.
 10. **State vs Log.** `STATE.md` = now (overwrite). `wiki/log.md` = past (append). `TaskList.md` = in-flight.
 11. **One task, one commit.** No opportunistic refactoring; no combined tasks.
 

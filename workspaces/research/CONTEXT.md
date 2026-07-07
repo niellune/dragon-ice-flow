@@ -5,9 +5,12 @@
 
 ## Gates
 
-- **Wiki writes** (ingest, lint changes) use the `<ingest>` gate defined in this file.
+Gate scopes are defined once in `.context/task-workflow.md` → "Which Gate Covers What". For this workspace:
+
+- **Multi-page wiki writes** (ingest, lint fixes) use the `<ingest>` gate defined in this file.
+- **Single-page wiki writes** (filing a query answer back) use a one-line confirmation — see Operation: Query.
 - **Code writes** (e.g. moving a wiki insight into `reference/`, updating a script) follow the standard XML task gate in `.context/task-workflow.md`.
-- **Reads** (querying the wiki, exploring `raw/`) are free.
+- **Reads** (querying the wiki, exploring `raw/`) are free. Appending to `wiki/log.md` is exempt bookkeeping.
 
 ## What This Workspace Is For
 
@@ -80,7 +83,7 @@ When the user asks a question that requires accumulated knowledge:
 1. **Start at `wiki/index.md`.** Find candidate pages.
 2. **Read only relevant pages.** Follow `[[wiki-links]]` to drill in. Never load the whole wiki.
 3. **Synthesize with citations.** Every claim should reference a wiki page or a `raw/` source.
-4. **File good answers back into the wiki.** If the answer is a new comparison, analysis, or connection — create or update a page so it compounds.
+4. **File good answers back into the wiki.** If the answer is a new comparison, analysis, or connection — create or update a page so it compounds. This is a wiki write: confirm in one line first ("Filing this back as `wiki/concepts/[slug].md` — ok?") and wait for a yes. If the filing would touch 3+ pages, use the full `<ingest>` gate instead.
 5. **Log the query.** Append to `wiki/log.md`: `## [YYYY-MM-DD] query | [question]`.
 
 ## Operation: Lint

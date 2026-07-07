@@ -8,7 +8,7 @@
 - Commit with a focused message per `rules.md` Git conventions. One task = one commit.
 - Move the task from `## In Progress` to `## Done` in `TaskList.md` with the commit SHA and date.
 - If the task changed the current state of the project (architecture, stack, focus, environments), update the relevant section in `STATE.md`. **Overwrite**, don't append — `STATE.md` is the present, not the past.
-- If the task produced a notable decision (architecture, library, pattern), append a new entry at the top of `wiki/log.md`. Format: `## [YYYY-MM-DD] <kind> | <summary>` where kind is one of `decision | feat | fix | refactor | docs`.
+- If the task produced a notable decision (architecture, library, pattern), append a new entry at the top of `wiki/log.md`. Format: `## [YYYY-MM-DD] <kind> | <summary>` — the canonical list of kinds lives in `wiki/log.md`'s header; don't restate it elsewhere.
 - If the task created a new wiki page or reference doc, add a one-line entry to the appropriate index.
 
 ## State vs Log — Which File?

@@ -37,13 +37,13 @@ Workspaces frame a whole task. Skills are invoked briefly within one, then you r
 
 Loaded for every task regardless of workspace:
 - `STATE.md` → current situation
-- `.context/rules.md` → section: "non-negotiables" (lines 1–40 only)
-- `.context/task-workflow.md` → **required before any file write.** No `Edit`/`Write` without an approved XML task.
+- `.context/rules.md` → the `## Non-Negotiables` section only
+- `.context/task-workflow.md` → **required before any file write.** Its "Which Gate Covers What" table is the canonical map of which gate (or exemption) applies to each surface.
 
 `TaskList.md` is loaded when starting, completing, or planning work. Not always-load.
 
 ## Selective Loading
 
-When a workspace points to a reference file, load **only the named section or line range**, not the whole file.
-- ✅ `reference/api-conventions.md` lines 50–90 (the auth section)
+When a workspace points to a reference file, load **only the named section**, not the whole file. Locate it by heading — headings survive edits; line numbers don't.
+- ✅ `reference/api-conventions.md` → only the `## Auth` section
 - ❌ `reference/api-conventions.md` (the whole 400-line file)

@@ -2,8 +2,8 @@
 
 > The task board. Every XML task lives here from creation to completion.
 >
-> Status flow: `backlog` → `ready` → `in-progress` → `verifying` → `done`
-> (Skip statuses freely. Don't make work for yourself.)
+> Status flow: `backlog` → `ready` → `in-progress` → `done`
+> (Verification happens inside `in-progress`: run `<verify>` before moving to Done. Skip statuses freely — don't make work for yourself.)
 
 ## How to Use
 
@@ -20,7 +20,9 @@
 - `feat-001`, `feat-002`, ... feature-development
 - `bug-001`, `bug-002`, ... debugging
 - `ref-001`, `ref-002`, ... refactoring
-- `res-001`, `res-002`, ... research (wiki ingests, lints, structural changes)
+
+**Research work** (executed under the ingest gate — no XML task; the ID just tracks the operation on this board):
+- `res-001`, `res-002`, ... wiki ingests, lints, wiki structural changes. If a research operation also edits code (e.g. distilling into `reference/`), that edit gets its own code-gate task.
 
 **Planning artifacts** (executed under planning gate):
 - `story-001`, `story-002`, ... user stories in `planning/stories/`

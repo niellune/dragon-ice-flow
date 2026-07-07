@@ -109,8 +109,8 @@ For an active project at month 6:
 | `STATE.md` | ~300 | 500 |
 | `TaskList.md` | ~400 (most in Done) | 700 |
 | `.context/rules.md` | ~500 (filled in) | 800 |
-| `.context/task-workflow.md` | ~270 | 350 |
-| **Always-load total** | **~3,300** | **4,800** |
+| `.context/task-workflow.md` | ~480 (incl. gate table) | 600 |
+| **Always-load total** | **~3,500** | **5,000** |
 | Workspace files | 300–1400 each | 1500 |
 | `wiki/index.md` | ~600 (~50 entries) | 1200 |
 | Planning indexes (each) | ~200 | 500 |
