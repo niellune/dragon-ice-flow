@@ -28,7 +28,7 @@ If the request doesn't match one of these, ask: "Is this clear enough to write a
 
    For anything more involved, switch to `workspaces/planning/` and produce a real story.
 
-2. **Plan, then build.** Use Claude Code's plan mode. Get user approval on the plan before touching files.
+2. **Plan, then build.** A single small change gets one `<task>`. Multi-task work gets a `<plan>` per `.context/task-workflow.md`. Get user approval before touching files — the XML gate is the only approval ceremony; don't use Claude Code's plan mode on top of it.
 
 3. **Smallest shippable slice.** Build the thinnest end-to-end version first. Polish later.
 
@@ -38,7 +38,6 @@ If the request doesn't match one of these, ask: "Is this clear enough to write a
 
 | When working on... | Load |
 |---|---|
-| Where a new file/feature belongs (FSD layer/slice/segment) | `reference/architecture/feature-sliced-design.md` |
 | Frontend / UI | `reference/ui-patterns.md` |
 | API endpoints | `reference/api-conventions.md` |
 | Database schema | `reference/data-model.md` |
