@@ -78,4 +78,4 @@ The sentinel is gitignored. If the hook blocks a write you believe is exempt, ch
 
 Red flags, state-vs-log boundaries, when this doesn't apply, after-task checklist details → `.context/task-workflow-appendix.md` (load when needed).
 
-Which model/subagent executes an approved task → `.context/subagent-delegation.md` (load when executing).
+Pipeline roles, model routing, and escalation for executing approved work → `.context/multi-agent-pipeline.md` (load when executing).
