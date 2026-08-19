@@ -16,7 +16,13 @@ Most templates make you learn commands. This one doesn't.
 
 **Depth is opt-in.** Want more? Say "tell me more", "why", "explain", "details". Without those signals, Claude gives you the short answer.
 
+## Repository Layout
+
+The product is the **`starter/`** folder — copy it as the root of your project. This `README.md`, `SETUP.md`, and `LICENSE` are documentation about the template and stay behind.
+
 ## Folder Map
+
+What your project looks like after copying `starter/`:
 
 ```
 your-project/

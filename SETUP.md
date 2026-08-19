@@ -6,17 +6,16 @@
 
 ## Step 0 — Get the template
 
-- **Copy** this folder into your new project location (or use it as a GitHub template).
-- If you copied it, detach the template's git history and start your own:
+- **Copy the `starter/` folder** — and only it — as the root of your new project. Everything at this repo's top level (`README.md`, `SETUP.md`, `LICENSE`) is documentation *about* the template and doesn't belong in your app.
+- Then start your own git history inside the copied folder:
 
   ```
-  rm -rf .git
   git init
   git add -A
   git commit -m "Bootstrap from Ice Flow template"
   ```
 
-- Keep `.claude/` and `.gitignore` — the gate hook lives there, and the gitignore excludes the gate sentinel (`.claude/gate-open`).
+- Keep the hidden files: `.claude/` (the gate hook lives there) and `.gitignore` (it excludes the gate sentinel `.claude/gate-open`).
 
 ## Step 1 — Verify the gate hook (2 min)
 
