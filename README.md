@@ -32,6 +32,7 @@ your-project/
 │   ├── glossary.md
 │   ├── task-workflow.md   ← code gate
 │   ├── task-workflow-appendix.md
+│   ├── multi-agent-pipeline.md   ← roles/routing/escalation (bind per project)
 │   └── housekeeping.md
 │
 ├── workspaces/            ← feature-development, debugging, refactoring, planning, research
@@ -61,33 +62,7 @@ shipped → TaskList.md ## Done + wiki/log.md
 
 ## First-Time Bootstrap (15–30 min)
 
-### Step 1 — Set project identity (5 min)
-
-Open `CLAUDE.md`. Fill the four lines: Name, One-line purpose, Stage, Primary stack.
-
-### Step 2 — Fill `STATE.md` (10 min)
-
-Current Focus, Architecture Snapshot, Stack & Versions, Environments. Skip Recently Shipped / Known Issues if empty.
-
-### Step 3 — Set non-negotiables in `.context/rules.md` (5 min)
-
-Top 5 rules are universal — keep them. Below that, fill in or **delete** sections that don't apply. Bracketed placeholders are prompts for you, not instructions for Claude.
-
-### Step 4 — Fill `.context/identity.md` if user-facing (5 min)
-
-Voice, tone, target user. Skip for internal tooling.
-
-### Step 5 — Decide starting point
-
-- Pre-code, fuzzy idea → use the planning workspace
-- Concrete first feature → use feature-development
-- Existing codebase → use research first to ingest key docs
-
-### Step 6 — Start your first session
-
-> "Read CLAUDE.md, CONTEXT.md, and STATE.md. Then tell me which workspace applies to: [my task]"
-
-That's it.
+Full walkthrough in **[SETUP.md](SETUP.md)** — getting the template, verifying the gate hook actually blocks, filling identity/state/rules, binding the multi-agent pipeline, and a first-session smoke test. Don't skip the hook check.
 
 ## Day-to-Day Usage
 
