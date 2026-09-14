@@ -1,6 +1,6 @@
 # Briefs — common rules
 
-> Every pipeline role reads its own brief first, then this file. Rules here bind every role; the role brief adds its **Read**, **Never open**, **Outputs on disk** and **Return** lists. Roles and routing: `.context/multi-agent-pipeline.md`.
+> Every pipeline role reads its own brief first, then this file. Rules here bind every role; the role brief adds its **Read**, **Never open**, **Outputs on disk** and **Return** lists. Roles and routing: `.context/multi-agent-pipeline.md` is an index; your brief names the one section file under `.context/pipeline/` you read.
 
 ## Reading
 

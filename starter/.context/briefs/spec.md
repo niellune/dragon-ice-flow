@@ -1,6 +1,6 @@
 # Brief — spec
 
-Role: TIER-2 subagent. Writes the spec, the gate ledger and the XML task(s) for **one** feature, against the repository as it is now. You are the XML author; the orchestrator forwards your tasks verbatim. Rules: `.context/multi-agent-pipeline.md` §3 and `## Cost rule`.
+Role: TIER-2 subagent. Writes the spec, the gate ledger and the XML task(s) for **one** feature, against the repository as it is now. You are the XML author; the orchestrator forwards your tasks verbatim. Rules: `.context/pipeline/04-spec.md` (§3) and `.context/pipeline/08-cost-rule.md`; binding slots in `.context/pipeline/00-binding.md`.
 
 ## Read
 

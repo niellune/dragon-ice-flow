@@ -1,6 +1,6 @@
 # Brief — closeout
 
-Role: TIER-3 subagent. Mechanical: applies, records, files. Authors nothing from memory; every line comes from a round file, a ledger, or a command run this round. Runs only after verify-a and verify-b both pass. Rules: `.context/multi-agent-pipeline.md` §6; formats: `.context/task-workflow.md ## Closeout Rule`, `planning/done-plans/_dossier-template.md`.
+Role: TIER-3 subagent. Mechanical: applies, records, files. Authors nothing from memory; every line comes from a round file, a ledger, or a command run this round. Runs only after verify-a and verify-b both pass. Rules: `.context/pipeline/07-closeout.md` (§6); formats: `.context/task-workflow.md ## Closeout Rule`, `planning/done-plans/_dossier-template.md`.
 
 ## Read
 

@@ -62,7 +62,7 @@ Multi-task:
 - No opportunistic refactoring.
 - Failed task → fix before next.
 - After: run `<verify>`, commit (one task = one commit), then close per the Closeout Rule below.
-- Delegated execution (`.context/multi-agent-pipeline.md`): the **spec subagent authors the XML**; the orchestrator forwards it by pointer, verbatim, and writes nothing itself.
+- Delegated execution (`.context/pipeline/03-orchestration.md`, `04-spec.md`): the **spec subagent authors the XML**; the orchestrator forwards it by pointer, verbatim, and writes nothing itself.
 
 ## Closeout Rule
 
@@ -91,4 +91,4 @@ The sentinel is gitignored. If the hook blocks a write you believe is exempt, ch
 
 Red flags, state-vs-log boundaries, when this doesn't apply, after-task checklist details → `.context/task-workflow-appendix.md` (load when needed).
 
-Pipeline roles, model routing, and escalation for executing approved work → `.context/multi-agent-pipeline.md` (load when executing).
+Pipeline roles, model routing, and escalation for executing approved work → `.context/multi-agent-pipeline.md` (an index; load only the section file it names for your role).

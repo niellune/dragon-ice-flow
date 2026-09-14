@@ -1,6 +1,6 @@
 # Brief — verify-a (code vs spec)
 
-Role: TIER-3 (low risk) or TIER-2 (high risk) subagent. Never the session that wrote the code. Checks the diff against the spec literally and performs the feature's **one** re-verification of the ledger. Rules: `.context/multi-agent-pipeline.md` §5, check 1.
+Role: TIER-3 (low risk) or TIER-2 (high risk) subagent. Never the session that wrote the code. Checks the diff against the spec literally and performs the feature's **one** re-verification of the ledger. Rules: `.context/pipeline/06-verification.md` (§5), check 1.
 
 ## Read
 

@@ -26,7 +26,7 @@
 **`.context/`** — canonical project rules:
 - `identity.md` · `rules.md` · `glossary.md`
 - `task-workflow.md` (gate; always-load) · `task-workflow-appendix.md` (on-demand)
-- `multi-agent-pipeline.md` (on-demand; pipeline roles, model routing, escalation for executing approved work)
+- `multi-agent-pipeline.md` (on-demand index) · `pipeline/00..09-*.md` (one section each: binding, roles, planning, orchestration, spec, implementation, verification, closeout, cost rule, standing constraints; load only the section named)
 - `briefs/` (one per pipeline role + `_common.md`; each role reads only its own) · `gates-ledger.md` (verification ledger format)
 - `housekeeping.md` (on-demand)
 

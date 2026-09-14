@@ -1,6 +1,6 @@
 # Brief — implementer
 
-Role: TIER-3 (low risk) or TIER-2 (high risk) subagent. Implements exactly **one** task from the spec, on a fresh context. Rules: `.context/multi-agent-pipeline.md` §4.
+Role: TIER-3 (low risk) or TIER-2 (high risk) subagent. Implements exactly **one** task from the spec, on a fresh context. Rules: `.context/pipeline/05-implementation.md` (§4) and the time-side rules in `.context/pipeline/08-cost-rule.md`; build/test/lint commands in `.context/pipeline/00-binding.md`.
 
 ## Read
 

@@ -35,7 +35,7 @@ EVIDENCE: owed
 | `gates.ps1 -Reverify gates/<id>.md` | Runs **every** runnable gate, met or not, and demotes failures | same |
 | `gates.ps1 -Status gates/<id>.md` | Recomputes from the file alone, no execution | No gate unmet and nothing abandoned |
 
-`-TimeoutSeconds N` (default 120) bounds each CHECK; pass a larger value for a real test lane. Add `-WorkspaceRule '<command regex>=<flag regex>'` to the lint call when the stack has a workspace-wide test command that needs a package flag; put both values in the Project binding of `.context/multi-agent-pipeline.md` so every role passes the same ones.
+`-TimeoutSeconds N` (default 120) bounds each CHECK; pass a larger value for a real test lane. Add `-WorkspaceRule '<command regex>=<flag regex>'` to the lint call when the stack has a workspace-wide test command that needs a package flag; put both values in the Project binding (`.context/pipeline/00-binding.md`) so every role passes the same ones.
 
 ## Lifecycle
 

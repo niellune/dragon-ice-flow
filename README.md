@@ -44,7 +44,8 @@ your-project/
 │   ├── glossary.md
 │   ├── task-workflow.md   ← code gate + Closeout Rule
 │   ├── task-workflow-appendix.md
-│   ├── multi-agent-pipeline.md   ← roles/routing/escalation/cost rule (bind per project)
+│   ├── multi-agent-pipeline.md   ← index over pipeline/ (one section file each; bind 00-binding.md per project)
+│   ├── pipeline/          ← 00-binding … 09-standing-constraints; roles load only the section their brief names
 │   ├── briefs/            ← one brief per pipeline role + _common.md
 │   ├── gates-ledger.md    ← verification ledger format
 │   └── housekeeping.md

@@ -20,7 +20,7 @@ Every number comes from a command run at closeout (`git log`, the ledger, the ro
 
 ## Verify cost
 
-One block per feature. Cited from `.context/multi-agent-pipeline.md ## Cost rule`, never copied there.
+One block per feature. Cited from `.context/pipeline/08-cost-rule.md`, never copied there.
 
 ### <feature-id>
 

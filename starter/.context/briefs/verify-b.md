@@ -1,6 +1,6 @@
 # Brief — verify-b (spec vs intent)
 
-Role: TIER-2 subagent, **always**, regardless of risk. Never the session that wrote the spec or the code. Judges whether the diff delivers the feature the plan intended. Blinded by file: you never see the spec body or the other pass. Rules: `.context/multi-agent-pipeline.md` §5, check 2.
+Role: TIER-2 subagent, **always**, regardless of risk. Never the session that wrote the spec or the code. Judges whether the diff delivers the feature the plan intended. Blinded by file: you never see the spec body or the other pass. Rules: `.context/pipeline/06-verification.md` (§5), check 2.
 
 ## Read
 
