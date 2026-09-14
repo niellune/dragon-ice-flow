@@ -22,7 +22,7 @@ These files have explicit "last N" rules. Enforce on every housekeep:
 |---|---|---|
 | `STATE.md` Recently Shipped | Last 5 | `wiki/log.md` (already there if logged correctly) |
 | `TaskList.md` Done | Last 20 | Nothing — git history + `wiki/log.md` already preserve it |
-| `wiki/log.md` | Last 6 months at the top, rest in an `archive/` section at the bottom | Same file, just below an `## Archive` header |
+| `wiki/log.md` | Current month only | `wiki/log/YYYY-MM.md` (entries verbatim), listed under Archived months at the top of the live log |
 | `planning/stories/index.md` Done | Last 20 | Older entries stay in `planning/stories/` but drop from the index |
 | `planning/plans/index.md` Done | Last 10 | Same |
 
@@ -88,13 +88,13 @@ On every housekeep:
 
 When the user asks to run housekeeping:
 
-1. **Report current state** — token counts of each always-load file vs targets, file counts in each folder.
+1. **Report current state** — run `powershell -File .claude/hooks/budget-check.ps1 -All`, then `powershell -File .claude/scripts/usage.ps1 -By week` (main vs subagent consumption from the transcripts), then token counts of the other always-load files vs targets, file counts in each folder.
 2. **Run Rule 1 trims** — propose specific deletions/moves; wait for approval.
 3. **Run Rule 5 STATE.md pruning** — propose specific changes; wait for approval.
 4. **Run Rule 2 archival check** — if any planning subfolder ≥30 files, propose batch archive.
 5. **Run Rule 3 wiki lint** — invoke the existing wiki lint operation from `workspaces/research/`. This already follows the propose-then-approve pattern.
 6. **Run Rule 4 reference review** — list files unused for 90+ days, propose archive.
-7. **Append a housekeep entry to `wiki/log.md`** with kind `housekeep` and a summary of what was changed.
+7. **Append a housekeep entry to `wiki/log.md`** with kind `housekeep`, a summary of what was changed, and the week's `mean_ctx` for main and sub from step 1. Every optimization adopted afterwards cites a before and after figure from this script.
 
 Housekeeping is a **proposal** workflow, not autonomous cleanup. Every action waits for approval.
 
@@ -106,8 +106,7 @@ For an active project at month 6:
 |---|---|---|
 | `CLAUDE.md` | ~850 | 1100 |
 | `CONTEXT.md` | ~600 | 800 |
-| `STATE.md` | ~300 | 500 |
-| `TaskList.md` | ~400 (most in Done) | 700 |
+| `STATE.md`, `TaskList.md` | mechanical — file and row limits live only in `.claude/hooks/budget-check.ps1` (hook on every write; `-All` in housekeeping) | same |
 | `.context/rules.md` | ~500 (filled in) | 800 |
 | `.context/task-workflow.md` | ~480 (incl. gate table) | 600 |
 | **Always-load total** | **~3,500** | **5,000** |
@@ -125,7 +124,7 @@ If you blow a hard limit, that's the trigger for a housekeep pass whether or not
 
 ## Frequency
 
-- **Weekly:** Rules 1 + 5 (the lightweight ones — STATE and trim windows)
+- **Weekly:** Rules 1 + 5 (the lightweight ones — STATE and trim windows) and the usage figure (`usage.ps1 -By week`)
 - **Monthly:** All five rules
 - **Quarterly:** Plus a `planning/_archive/` batch and a `reference/_archive/` review
 

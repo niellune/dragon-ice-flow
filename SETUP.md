@@ -21,11 +21,15 @@
 
 The XML task gate is enforced mechanically, not on trust. Check it before anything else:
 
-1. Open the project in Claude Code. Approve the hooks when prompted (`.claude/settings.json` registers a PreToolUse hook).
+1. Open the project in Claude Code. Approve the hooks when prompted (`.claude/settings.json` registers a PreToolUse gate hook and a PostToolUse budget hook).
 2. Smoke test: ask Claude to make a trivial edit to a file under `src/` *without* approving an XML task. The write should be **blocked** with a "Gate closed" message.
 3. If it isn't blocked: confirm `.claude/settings.json` exists (not renamed), and that PowerShell can run `.claude/hooks/gate-check.ps1`.
+4. Budget hook smoke test: `powershell -NoProfile -File .claude/hooks/budget-check.ps1 -Path .claude/scripts/tests/fixtures/over-budget/TaskList.md` should print `TaskList.md:3 is 276 chars; budget 240` and exit 1. That is the same refusal Claude sees when a board row grows past its budget.
+5. Ledger runner self-test: `powershell -NoProfile -File .claude/scripts/tests/gates.tests.ps1` should end with `N run, N passed`.
 
 Sentinel lifecycle (Claude manages this, but you should recognize it): approving an XML task → `.claude/gate-open` is created → task executes and commits → sentinel deleted. A sentinel left behind means the gate is silently open — delete the file.
+
+The scripts are Windows PowerShell 5.1 and ASCII-only. On macOS or Linux install `pwsh` and change `powershell` to `pwsh` in `.claude/settings.json`; the scripts run unchanged.
 
 ## Step 2 — Project identity (5 min)
 
@@ -51,13 +55,19 @@ Voice, tone, target user. Skip entirely for internal tooling.
 |---|---|
 | `TIER-1` / `TIER-2` / `TIER-3` | Your strongest / strong / efficient models (e.g. Fable / Opus / Sonnet) |
 | Task format | `.context/task-workflow.md` (the default fits) |
-| Closeout dossier format | `.context/task-workflow-appendix.md` (after-task checklist) |
+| Closeout dossier format | `planning/done-plans/_dossier-template.md` (ships filled in) |
+| Gate ledger / Role briefs | ship filled in (`gates/<id>.md`, `.context/briefs/`) |
 | Wiki root | `wiki/` |
-| Architecture map | `STATE.md` → `## Architecture Snapshot` (until you outgrow it) |
+| Architecture map | `STATE.md` → `## Architecture Snapshot` (until you outgrow it; then an index over section files) |
 | Tasklist / log | `TaskList.md` · `wiki/log.md` |
-| Build / Test / Lint commands | Per your stack — fill when the stack exists |
+| Build / Test / Lint commands | Per your stack — fill when the stack exists. Then fill the **standard gates** table in `.context/gates-ledger.md` and the measured timings in `.context/briefs/implementer.md`. |
+| Workspace-flag lint rule | Only if your test command is workspace-wide (e.g. a monorepo): `-WorkspaceRule '<cmd regex>=<flag regex>'` |
 
-Only the table gets edited; the rules themselves stay generic.
+Only the table gets edited; the rules themselves stay generic. The pipeline's operating rules (six-line dispatch, orchestrator writes nothing, blinding by file, one ledger re-execution, cost rulings) are in the same file and need no binding.
+
+## Step 6b — Take a usage baseline (1 min, after the first week)
+
+`powershell -NoProfile -File .claude/scripts/usage.ps1 -By week` reads the Claude Code transcripts for this project and prints main-vs-subagent consumption. Paste the `mean_ctx` figures into your first `housekeep` log entry; every later optimization cites a before and after from this script.
 
 ## Step 7 — Reset the wiki log (1 min, optional)
 

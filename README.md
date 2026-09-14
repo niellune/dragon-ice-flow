@@ -32,22 +32,32 @@ your-project/
 ├── STATE.md               ← current state (now)
 ├── TaskList.md            ← active kanban board
 │
+├── .gitattributes         ← LF pinned (line 1: * text=auto eol=lf)
+├── .claude/
+│   ├── settings.json      ← registers the two hooks below
+│   ├── hooks/             ← gate-check.ps1 (XML gate), budget-check.ps1 (board budgets)
+│   └── scripts/           ← gates.ps1 (verification ledger), usage.ps1 (token consumption), tests/
+│
 ├── .context/
 │   ├── identity.md
 │   ├── rules.md
 │   ├── glossary.md
-│   ├── task-workflow.md   ← code gate
+│   ├── task-workflow.md   ← code gate + Closeout Rule
 │   ├── task-workflow-appendix.md
-│   ├── multi-agent-pipeline.md   ← roles/routing/escalation (bind per project)
+│   ├── multi-agent-pipeline.md   ← roles/routing/escalation/cost rule (bind per project)
+│   ├── briefs/            ← one brief per pipeline role + _common.md
+│   ├── gates-ledger.md    ← verification ledger format
 │   └── housekeeping.md
 │
 ├── workspaces/            ← feature-development, debugging, refactoring, planning, research
 ├── skills/                ← brainstorm (and future skills)
-├── planning/              ← stories, specs, plans (each with index.md)
+├── planning/              ← stories, specs, plans (each with index.md), backlog.md,
+│                             rounds/<id>/ (per-role round files), done-plans/ (dossiers), _archive/
+├── gates/                 ← one ledger per feature in flight (created by the spec round)
 ├── reference/             ← deep docs YOU wrote
 │
 ├── raw/                   ← immutable sources
-├── wiki/                  ← LLM-maintained knowledge (index, log, entities, concepts, sources)
+├── wiki/                  ← LLM-maintained knowledge (index, log + log/YYYY-MM.md, entities, concepts, sources)
 │
 └── src/                   ← your actual code
 ```

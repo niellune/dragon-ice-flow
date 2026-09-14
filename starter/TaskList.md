@@ -3,14 +3,14 @@
 > The task board. Every XML task lives here from creation to completion.
 >
 > Status flow: `backlog` → `ready` → `in-progress` → `done`
-> (Verification happens inside `in-progress`: run `<verify>` before moving to Done. Skip statuses freely — don't make work for yourself.)
+> (Verification happens inside `in-progress`: run the task's gate ledger before moving to Done. Skip statuses freely — don't make work for yourself.)
 
 ## How to Use
 
 - When the user approves an XML task, append it to `## Ready` with a generated ID.
 - When you start work, move it to `## In Progress`.
-- After running `<verify>` and committing, move it to `## Done` with the commit SHA.
-- Notable outcomes (decisions, lessons) still get appended to `wiki/log.md`.
+- On close, write the Done row exactly per the Closeout Rule in `.context/task-workflow.md` (one line; detail goes to the dossier or `wiki/log.md`).
+- Rows are budgeted mechanically (`.claude/hooks/budget-check.ps1`). If a write is refused, shorten the row, never the rule.
 
 ## ID Convention
 
@@ -37,19 +37,21 @@ When a story and its spec describe the same feature, reuse the slug (e.g. `dashb
 
 *Active work. Should usually have exactly 1 item. More than 2 = drift.*
 
-- [ ] [task-id] — [one-line goal] *(started: YYYY-MM-DD)*
+### plan: [slug] — [first-id]..[last-id] — in-progress since [YYYY-MM-DD] — [pointer]
+
+- [ ] [task-id] — [one-line goal] — in-progress [YYYY-MM-DD]
 
 ## Ready
 
 *Approved XML tasks, not yet started. Pick from the top.*
 
-- [ ] [task-id] — [one-line goal]
+- [ ] [task-id] — [one-line goal] — ready
 
 ## Backlog
 
-*Ideas and unblocked work that hasn't been written as an XML task yet. Promote to Ready by writing the XML task and getting user approval.*
+*Counts only. Rows live in `planning/backlog.md`.*
 
-- [ ] [rough description]
+feat 0 · bug 0 · ref 0 · res 0 · planning 0
 
 ## Blocked
 
@@ -59,9 +61,9 @@ When a story and its spec describe the same feature, reuse the slug (e.g. `dashb
 
 ## Done
 
-*Most recent at top. Trim to last ~20; older ones are findable via `wiki/log.md` + git history.*
+*Most recent at top. Last 20; older rows are in `planning/done-plans/` or `wiki/log/`.*
 
-- [x] [task-id] — [one-line goal] — `<commit-sha>` *(YYYY-MM-DD)*
+- [x] [task-id] — [title] — DONE [YYYY-MM-DD] — [commit] — [gate-owed? yes/no] — [pointer]
 
 ---
 

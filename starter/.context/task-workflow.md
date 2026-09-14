@@ -42,7 +42,7 @@ The `<brainstorm>` wrapper in `skills/brainstorm/SKILL.md` is a declaration, not
     <write>...</write>
   </files>
   <action>Exact instructions, baked-in decisions, what to avoid.</action>
-  <verify>Runnable command that proves the goal.</verify>
+  <verify>ledger gates/<id>.md — G1, G2 (gate ids; format in .context/gates-ledger.md)</verify>
   <done>Definition of complete.</done>
 </task>
 ```
@@ -61,7 +61,19 @@ Multi-task:
 - One task at a time. Only touch files in `<write>`.
 - No opportunistic refactoring.
 - Failed task → fix before next.
-- After: run `<verify>`, commit (one task = one commit), move to `TaskList.md ## Done`, update `STATE.md` if state changed, append to `wiki/log.md` if notable decision.
+- After: run `<verify>`, commit (one task = one commit), then close per the Closeout Rule below.
+- Delegated execution (`.context/multi-agent-pipeline.md`): the **spec subagent authors the XML**; the orchestrator forwards it by pointer, verbatim, and writes nothing itself.
+
+## Closeout Rule
+
+Every close writes these rows, filled in, never paraphrased:
+
+- Board Done row: `- [x] ID — title — DONE YYYY-MM-DD — commit — gate-owed? — pointer`
+- Board plan header: `### plan: slug — first-id..last-id — status since YYYY-MM-DD — pointer`
+
+Detail (numbers, findings, owed gates, lessons) goes to the dossier or `wiki/log.md`, never the row. At every plan close, run housekeeping Rules 1 + 5 (`.context/housekeeping.md`) before the closing commit.
+
+Budgets are mechanical: `.claude/hooks/budget-check.ps1` holds the file and row limits, runs as a PostToolUse hook on every write, and as `-All` during housekeeping. A refused write means trim the row, not the rule.
 
 ## Enforcement (hook)
 

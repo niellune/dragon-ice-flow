@@ -26,6 +26,7 @@ Workspaces frame a whole task. Skills are invoked briefly within one, then you r
 | Writing user-facing copy | `.context/identity.md` (sections: voice, tone) |
 | Naming things / API design | `.context/glossary.md` |
 | Deciding where code goes — which layer/slice/segment a file belongs in | `reference/architecture/feature-sliced-design.md` |
+| Running the board — "proceed", "go", "next", "run the board", dispatching a pipeline role | `.context/multi-agent-pipeline.md` → only the `## 2. Orchestration` section. No source, no map, no spec body. |
 
 ## Wiki Integration Rules
 

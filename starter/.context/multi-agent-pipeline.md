@@ -14,11 +14,14 @@ Fill this in per project. Nothing else in this document needs editing.
 | `TIER-1` — highest capability, used sparingly | _model_ |
 | `TIER-2` — strong, used at both boundaries | _model_ |
 | `TIER-3` — efficient, used on the loop | _model_ |
-| Task format | _path to the doc that defines task units; canonical for that_ |
-| Closeout dossier format | _path; canonical for that_ |
-| Wiki root | _path_ |
-| Architecture map | _path_ |
-| Tasklist / log | _paths_ |
+| Task format | `.context/task-workflow.md` |
+| Closeout dossier format | `planning/done-plans/_dossier-template.md` |
+| Gate ledger | `gates/<feature-id>.md` · format `.context/gates-ledger.md` · runner `.claude/scripts/gates.ps1` |
+| Role briefs | `.context/briefs/<role>.md` + `_common.md` |
+| Workspace-flag lint rule | _not yet defined — `-WorkspaceRule '<cmd regex>=<flag regex>'` when the test command is workspace-wide_ |
+| Wiki root | `wiki/` |
+| Architecture map | `STATE.md` → `## Architecture Snapshot` (or an index over section files once the map grows) |
+| Tasklist / log | `TaskList.md` · `wiki/log.md` |
 | Build command | _command_ |
 | Test command | _command_ |
 | Lint / typecheck command | _command_ |
@@ -32,7 +35,7 @@ Where this document says "the build", "the tests", or "the task format", it mean
 | Stage | Tier | Output |
 |---|---|---|
 | Plan | TIER-1, separate session | Feature-level plan + risk flags |
-| Orchestrate | TIER-3, main agent | Dispatch, state updates, wiki writes |
+| Orchestrate | TIER-3, main agent | Six-line dispatch only; writes nothing |
 | Spec | TIER-2 subagent | Spec + tasks + findings + proposed map delta + risk confirmation |
 | Implement | low risk: TIER-3 · high risk: TIER-2 | Code diff + map-delta confirmation |
 | Verify — mechanical | low risk: TIER-3 · high risk: TIER-2 | Code vs spec, assumption checklist |
@@ -64,16 +67,32 @@ Own session. Produces artifacts, not code.
 
 ## 2. Orchestration
 
-The orchestrator dispatches and records. It does not exercise judgment on quality, scope, or ambiguity.
+The orchestrator dispatches and waits. It does not exercise judgment on quality, scope, or ambiguity, and it **writes nothing**: every file a round produces is written and committed by the role that produced it. Its context lives for the whole plan, so everything it reads or writes is paid on every later turn.
 
-- Re-read tasklist and log from the wiki at the start of every cycle. Do not carry state across cycles in context.
+**Per cycle it reads:** the board (`TaskList.md`) and the **last ten** entries of `wiki/log.md` (`grep "^## \[" wiki/log.md | head -10`, then those sections). It **opens no source**, no architecture map, no spec body, no round file, no dossier. Every subagent starts fresh and reads its own inputs; an orchestrator read is the wasted one. Do not carry state across cycles in context.
+
+**Dispatch is six lines. A seventh is forbidden.**
+
+```
+Role: <spec | implementer | verify-a | verify-b | closeout>
+Feature: <feature-id — title>
+Plan: <planning/plans/slug.md>
+Risk: <low | high>
+Baseline: <commit hash the round starts from>
+Read .context/briefs/<role>.md first, then .context/briefs/_common.md.
+```
+
+The XML task is the spec agent's output, written into the plan file; the orchestrator forwards it by pointer, never pasted, never edited.
+
+**Dispatch, then wait.** The subagent's report is the only completion signal. **Never poll**: no loops on status, diff, or process list; no "helping" reads while a round is out. One feature, one round, one subagent at a time.
+
 - Never answer another agent's open questions. Route them.
 - Never decide whether a finding matters. Route by the tag the producing agent assigned.
 - Never mark a feature done. Only closeout does that.
 
 | Trigger | Action |
 |---|---|
-| Finding tagged `fact` | Write to the wiki (log or entity page), then continue |
+| Finding tagged `fact` | Producer already recorded it in its round file or wiki page; continue |
 | Finding tagged `spec-surprise` | Continue; pass to both verifiers |
 | Finding tagged `plan-conflict` (spec, spike, or verify) | Stop. Escalate to human / re-plan |
 | Spec reports blocked or impossible | Return once to the spec agent with the blocker; 2nd time → human |
@@ -96,13 +115,17 @@ Each spec contains:
 
 - Concrete file paths to create or modify.
 - Existing code that must be reused rather than reinvented.
-- **Acceptance criteria** written so the verifier checks them literally. "Done" is defined here, once.
+- **Acceptance criteria** written so the verifier checks them literally. "Done" is defined here, once. Every AC that asserts a property of existing code cites `file:line` opened this round; an AC without a citation is a guess, and guesses buy fix rounds.
+- **Per task, what it protects and why.** Pins, golden files and shims are owed only by code a shipped path reads; name the shipped path or write "none".
 - Explicit out-of-scope list.
 - Task ordering and dependencies.
 - **Stated assumptions** about the codebase, one line each. These are the objective trigger for re-planning later.
-- **Findings**, each tagged `fact` / `spec-surprise` / `plan-conflict`. The orchestrator writes these to the wiki; they must not be left only in this agent's context.
+- **Findings**, each tagged `fact` / `spec-surprise` / `plan-conflict`. This agent writes them to its round file (or a wiki page) and commits; they must not be left only in its context.
 - **Proposed architecture-map delta**: which modules, boundaries, and data flows this feature will change, in the map's own vocabulary. Written before code exists, so it is a prediction — the implementer confirms or amends it.
+- **Map sections touched**, by heading. The implementer and both verify passes load the map index plus those sections and nothing else. No brief ever says "read the map".
 - **Risk confirmation**: confirm the planner's flag, or raise it. Never lower it. The planner set the flag without reading the relevant code; this agent has.
+
+The XML task(s) in the task format are this agent's output, written into the plan file and committed with the spec. The orchestrator forwards them by pointer.
 
 Do not write pseudo-code or implementation logic. Specify contract and intent; leave the how to the implementer.
 
@@ -110,7 +133,7 @@ Do not write pseudo-code or implementation logic. Specify contract and intent; l
 
 ## 4. Implementation
 
-- Fresh context. Inputs: the task unit, the spec, the architecture map. Not the planning or spec session's history.
+- Fresh context. Inputs: the task unit, the spec, the map sections the spec names, the ledger. Not the planning or spec session's history. Reading list and never-open list: `.context/briefs/implementer.md`.
 - Implement exactly the task. Do not expand scope.
 - If the spec is wrong or impossible, stop and report. Do not improvise a fix.
 - On completion, return the **map delta confirmed or amended**, one line per change. Divergence from the spec's predicted boundaries is a `spec-surprise` — tag and report it.
@@ -121,11 +144,11 @@ Do not write pseudo-code or implementation logic. Specify contract and intent; l
 
 Never the session that wrote the code. Two checks, both required, and the second never downgrades:
 
-**Check 1 — code vs spec.** Does the diff satisfy the acceptance criteria? Includes running the build, tests, and lint. TIER-3 on low risk, TIER-2 on high.
+**Check 1 — code vs spec (verify-a).** Does the diff satisfy the acceptance criteria? Re-verifies every gate of the ledger (`gates/<id>.md`, format in `.context/gates-ledger.md`): this is the feature's **one re-execution**. The implementer ran the ledger once when the diff was ready; nobody runs the lanes after verify-a. Also checks the assumption checklist, the AC self-audit table row by row, and the map delta. TIER-3 on low risk, TIER-2 on high.
 
-**Check 2 — spec vs intent.** Does this spec actually deliver the feature that was planned? **TIER-2, always.** The spec author cannot catch its own spec-level errors, and a misclassified risk flag must never leave a feature with no independent check. Inputs: feature intent from the plan, the spec, the diff.
+**Check 2 — spec vs intent (verify-b).** Does this diff actually deliver the feature that was planned? **TIER-2, always.** The spec author cannot catch its own spec-level errors, and a misclassified risk flag must never leave a feature with no independent check. Inputs: feature intent from the plan, the diff, the ledger's `-Status` line (any unmet gate is a fail; it never executes).
 
-**Depth by risk.** Low: one pass each. High: run the two checks as blinded sessions — check 1 receives spec + diff only, check 2 receives plan intent + diff only. If both sessions receive everything, you have one reviewer running twice, not two reviewers.
+**Blinding is by file, on every feature.** Each verifier's brief carries a **Never open** list: verify-a never opens `verify-b.md` or the plan; verify-b never opens the spec body, `implement.md`, or `verify-a.md`. If both passes receive everything, you have one reviewer running twice, not two reviewers. Risk selects only the tier of check 1.
 
 **Assumption checklist — required structural output.** Every stated assumption from the spec, listed, each resolved as:
 
@@ -145,18 +168,55 @@ Output: pass/fail plus feedback specific enough to act on.
 
 Runs only after both verify checks pass. Mechanical — no authoring, no free-form summarizing. Follows the project's closeout dossier format.
 
-- Commit the diff.
-- Write feature docs; commit.
+- The diff is already committed by the implementer; closeout commits only records, by pathspec.
 - **Apply the verified map delta** to the architecture map. Apply only. If the delta is missing or contradicts the map, closeout stops and reports. It never invents.
-- Mark the feature done in the tasklist; note any plan deviation in the log.
-- Last feature of a plan: wiki housekeeping.
+- Board row per the Closeout Rule; note any plan deviation in the log entry, never the row.
+- Last feature of a plan: author the dossier from the round files (`planning/rounds/<id>/`) into `planning/done-plans/<slug>.md` from the template; paste every feature's EVIDENCE lines verbatim; list owed manual gates under Owed; delete each `gates/<id>.md`; add the row to `planning/done-plans.md`; run housekeeping Rules 1 + 5.
+
+---
+
+## Cost rule
+
+Costs are recorded per stage so that "make it cheaper" lands where the cost is, not where it is visible. Verification is about a sixth of a feature; the bulk is the implementer and the fix rounds, and fix rounds are bought by ambiguous specs.
+
+**Stage-cost table.** Filled from dossiers, cited here, never copied. One row per stage per closed feature; the source column names the dossier.
+
+| Stage | Model | Wall-clock | Verdict | Flags | Source (dossier) |
+|---|---|---|---|---|---|
+| spec round | | | | | _none closed yet_ |
+| implementer | | | | | |
+| verify-a | | | | | |
+| verify-b | | | | | |
+| fix rounds | | | | | |
+
+**Four rulings, pre-committed before any data exists:**
+
+1. **The spec round is never cut.** Every fix round it prevents costs more than it does.
+2. **Verification is not the lever.** Pre-committed here so it cannot be re-opened by whoever reads the table first. If something must be downgraded for cost, downgrade the implementer.
+3. **Protection scales with shipped footprint.** Pins, golden files and shims are owed only by code a shipped path reads. The spec names per task what it defends and why; a task with no shipped path owes none.
+4. **Fix rounds traced to spec ambiguity become a spec finding at closeout**, recorded in the dossier's Spec findings bullet, so the next spec round starts from them.
+
+**Time-side rules:**
+
+- Every acceptance criterion that asserts a property of existing code cites `file:line` (§3).
+- A task expected past **~2 hours or 150 tool uses** is split before dispatch, with the seam named in the spec.
+- The implementer **stops hard at 150 tool uses**: commits nothing, returns the seam. The orchestrator routes the seam to the spec agent as a split, never back to the implementer as "continue".
+- The implementer returns an **AC self-audit table** (criterion · covering test · red-on-revert evidence). Verify-a checks it row by row; a row without evidence is an unmet AC.
+
+**Spike lane.** A task that ships nothing (its deliverable is a written finding) keeps the spec round and verify-b, drops verify-a, and batches its closeout with the plan's. Eligibility is per task, never per plan:
+
+- deliverable is a finding in `wiki/` or `planning/`, not a diff under `src/`;
+- no shipped path reads anything it writes;
+- its ledger has no test-lane gate (only the board-budget, zero-CR and prose gates).
+
+**Verify-cost review, pre-committed.** Trigger: the first plan to close after **five** features have closed under this pipeline. Rulings already made: the review reads the stage-cost table and the dossiers' verify-cost blocks; it may re-tier the implementer or re-scope spec depth; it may not remove verify-b, merge the two passes, or cut the spec round (rulings 1 and 2 above). Output: `planning/done-plans/verify-cost-review-YYYY-MM.md`, citing the dossiers it read.
 
 ---
 
 ## Standing constraints
 
 - **Fresh context per role.** No session both plans and executes, or both specs and verifies.
-- **State lives in the wiki**, not in agent context. Any agent can be restarted from wiki state alone.
+- **State lives on disk** (board, log, round files in `planning/rounds/<id>/`, ledgers in `gates/`), not in agent context. Any agent can be restarted from disk state alone. The producer commits its own files; the orchestrator commits nothing.
 - **The gate is not the gatekeeper.** Closeout commits only what verify passed.
 - **Escalation is rule-triggered, never discretionary.**
 - **Capability is never removed from the intent check.** If something must be downgraded for cost, downgrade the implementer.

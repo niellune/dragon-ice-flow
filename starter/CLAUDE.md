@@ -27,19 +27,22 @@
 - `identity.md` · `rules.md` · `glossary.md`
 - `task-workflow.md` (gate; always-load) · `task-workflow-appendix.md` (on-demand)
 - `multi-agent-pipeline.md` (on-demand; pipeline roles, model routing, escalation for executing approved work)
+- `briefs/` (one per pipeline role + `_common.md`; each role reads only its own) · `gates-ledger.md` (verification ledger format)
 - `housekeeping.md` (on-demand)
 
 **`workspaces/`** — task-type contexts: `feature-development/`, `debugging/`, `refactoring/`, `planning/`, `research/`
 
 **`skills/`** — on-demand thinking: `brainstorm/`
 
-**`planning/`** — artifacts: `stories/`, `specs/`, `plans/` (each has `index.md`)
+**`planning/`** — artifacts: `stories/`, `specs/`, `plans/` (each has `index.md`) · `backlog.md` · `rounds/<id>/` (per-role round files) · `done-plans.md` + `done-plans/` (dossiers) · `_archive/`
+
+**`gates/`** — one verification ledger per feature in flight, nothing else
 
 **`reference/`** — deep docs YOU wrote (loaded on demand)
 
 **`raw/`** — immutable source documents (PDFs, transcripts, articles)
 
-**`wiki/`** — LLM-maintained knowledge: `index.md`, `log.md`, `entities/`, `concepts/`, `sources/`
+**`wiki/`** — LLM-maintained knowledge: `index.md`, `log.md` (current month; older in `log/YYYY-MM.md`), `entities/`, `concepts/`, `sources/`
 
 **`src/`** — your actual code. Frontend is organized by **Feature-Sliced Design** (`app → pages → widgets → features → entities → shared`); spec in `reference/architecture/feature-sliced-design.md`
 
