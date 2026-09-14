@@ -88,7 +88,7 @@ On every housekeep:
 
 When the user asks to run housekeeping:
 
-1. **Report current state** — run `powershell -File .claude/hooks/budget-check.ps1 -All`, then `powershell -File .claude/scripts/usage.ps1 -By week` (main vs subagent consumption from the transcripts), then token counts of the other always-load files vs targets, file counts in each folder.
+1. **Report current state** — run `powershell -File .claude/hooks/budget-check.ps1 -All`, then `powershell -File .claude/scripts/usage.ps1 -By week` (main vs subagent consumption from the transcripts), then `powershell -File .claude/scripts/unslop/unslop.ps1 -All` (prose findings on the record roots; a true finding is a rewrite through the folder's gate, a false one is a rule fix), then token counts of the other always-load files vs targets, file counts in each folder.
 2. **Run Rule 1 trims** — propose specific deletions/moves; wait for approval.
 3. **Run Rule 5 STATE.md pruning** — propose specific changes; wait for approval.
 4. **Run Rule 2 archival check** — if any planning subfolder ≥30 files, propose batch archive.

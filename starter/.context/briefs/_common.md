@@ -24,7 +24,12 @@
 - Never background any job from a subagent. You get no completion callback; the job outlives your report.
 - Verification runs the ledger (`gates/<feature-id>.md`, format in `.context/gates-ledger.md`); the implementer runs it once, verify-a re-verifies once, verify-b reads status only. Three full-lane runs on one commit buy nothing the first did not.
 
+## Costs, recorded by every role
+
+- Note the clock when you start. Your round file and your return both carry **wall-clock** (start to return) and **tool-use count**. These are the only source for the stage-cost table in the pipeline doc and the dossier's verify-cost block; a round without them cannot be costed.
+- Commit message per role: `[<id>] spec round: <title>` · `[<id>] <title>` (implementer) · `[<id>] verify A: PASS|FAIL` · `[<id>] verify B: PASS|FAIL` · `[<id>] closeout: <title>` · `[<id>] record fix at source: <what>`.
+
 ## Returning
 
-- Your report is the orchestrator's **only** completion signal. Return exactly what your brief's Return list names: commit hash, verdict or seam, and flags with their tags (`fact` / `spec-surprise` / `plan-conflict`). Nothing the orchestrator would have to open a file to learn.
+- Your report is the orchestrator's **only** completion signal. Return exactly what your brief's Return list names: commit hash, verdict or seam, flags with their tags (`fact` / `spec-surprise` / `plan-conflict`), wall-clock, tool-use count. Nothing the orchestrator would have to open a file to learn.
 - If you are blocked, the first line of the report says so and why. Never improvise past a blocker.

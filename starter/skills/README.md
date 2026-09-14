@@ -16,6 +16,7 @@ A skill says *"this is a kind of thinking I'm reaching for right now."*
 ## Current Skills
 
 - **`brainstorm/`** — explore possibilities before committing. Four modes: divergent, convergent, stress-test, analogize.
+- **`unslop/`** — audit and repair AI writing patterns in records. Two modes: audit (report only) and rewrite (through the folder's gate). The scanner also runs as a PostToolUse hook and as the prose gate in ledgers.
 
 ## Adding a Skill
 

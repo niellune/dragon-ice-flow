@@ -26,6 +26,7 @@ The XML task gate is enforced mechanically, not on trust. Check it before anythi
 3. If it isn't blocked: confirm `.claude/settings.json` exists (not renamed), and that PowerShell can run `.claude/hooks/gate-check.ps1`.
 4. Budget hook smoke test: `powershell -NoProfile -File .claude/hooks/budget-check.ps1 -Path .claude/scripts/tests/fixtures/over-budget/TaskList.md` should print `TaskList.md:3 is 276 chars; budget 240` and exit 1. That is the same refusal Claude sees when a board row grows past its budget.
 5. Ledger runner self-test: `powershell -NoProfile -File .claude/scripts/tests/gates.tests.ps1` should end with `N run, N passed`.
+6. Prose scanner self-test: `powershell -NoProfile -File .claude/scripts/tests/unslop.tests.ps1` should end with `N run, N passed`. The same scanner runs as the second PostToolUse hook on records (`planning/done-plans/`, `wiki/*.md`, `reference/`, `.context/`) and refuses an edit that reads like assistant prose; `skills/unslop/SKILL.md` says how to repair one, and `.claude/scripts/unslop/rules.ps1` is where a false positive gets fixed.
 
 Sentinel lifecycle (Claude manages this, but you should recognize it): approving an XML task → `.claude/gate-open` is created → task executes and commits → sentinel deleted. A sentinel left behind means the gate is silently open — delete the file.
 

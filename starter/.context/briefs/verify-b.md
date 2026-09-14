@@ -18,17 +18,19 @@ Role: TIER-2 subagent, **always**, regardless of risk. Never the session that wr
 
 ## Do
 
-- Ask one question: does this diff deliver the planned feature? Judge against intent, not against the spec's wording.
+- Ask one question: does this diff deliver the planned feature? Judge against intent, not against the spec's wording. Is anything in the intent silently dropped or contradicted?
 - A spec that cannot deliver the intent is a `plan-conflict` — say so; it is not a code defect.
-- Never re-run the build, tests or lint. The status line is your evidence.
+- **Assumption checklist is structural**: every row of `assumptions.md` marked `✓` (holds, with `file:line` you opened) / `✗` (violated, with evidence) / `n/a — not code-verifiable` (one-line reason). When the evidence says the *record* is stale (an old comment, a spec typo, a superseded reference line) rather than the code wrong, mark it `✗ record-error suspected`; same routing, pre-triaged for closeout's fix-at-source step. An unmarked row invalidates the pass.
+- Never re-run the build, tests or lint. The status line is your evidence. **Do not modify the tree.**
 - Cite only `file:line` you opened this round.
 
 ## Outputs on disk
 
-- `planning/rounds/<id>/verify-b.md`, committed by you by pathspec: verdict, reasoning, gate status line pasted, flags.
+- `planning/rounds/<id>/verify-b.md`: verdict PASS/FAIL with the intent reasoning; the `-Status` summary line; the assumption checklist, every row marked; findings tagged with `file:line`; **wall-clock, tool-use count**.
+- **One commit** `[<id>] verify B: PASS|FAIL` with `verify-b.md`. No other file.
 
 ## Return
 
-- `pass` or `fail`, with reasons specific enough to act on.
-- Commit hash of `verify-b.md`.
-- Flags with tags.
+- `PASS` or `FAIL`, with reasons specific enough to act on.
+- Commit hash. Wall-clock, tool-use count.
+- Flags with tags. A `plan-conflict` stops the pipeline.

@@ -32,7 +32,7 @@
 
 **`workspaces/`** — task-type contexts: `feature-development/`, `debugging/`, `refactoring/`, `planning/`, `research/`
 
-**`skills/`** — on-demand thinking: `brainstorm/`
+**`skills/`** — on-demand thinking: `brainstorm/` · `unslop/` (prose audit and repair; scanner in `.claude/scripts/unslop/`, wired as a PostToolUse hook on records)
 
 **`planning/`** — artifacts: `stories/`, `specs/`, `plans/` (each has `index.md`) · `backlog.md` · `rounds/<id>/` (per-role round files) · `done-plans.md` + `done-plans/` (dossiers) · `_archive/`
 

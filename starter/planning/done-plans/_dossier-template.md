@@ -24,13 +24,15 @@ One block per feature. Cited from `.context/multi-agent-pipeline.md ## Cost rule
 
 ### <feature-id>
 
-| Pass | Model | Wall-clock | Verdict | Flags | Adjudication |
-|---|---|---|---|---|---|
-| spec round | | | | | |
-| implementer | | | | | |
-| verify-a (code vs spec) | | | | | |
-| verify-b (spec vs intent) | | | | | |
-| fix round 1 | | | | | |
+| Pass | Model | Wall-clock | Tool uses | Verdict | Flags | Adjudication (`code-fix` / `record-error` / `n/a`) |
+|---|---|---|---|---|---|---|
+| spec round | | | | | | |
+| implementer | | | | | | |
+| verify-a (code vs spec) | | | | | | |
+| verify-b (spec vs intent) | | | | | | |
+| fix round 1 | | | | | | |
+
+Wall-clock and tool uses come from each role's round file, never estimated.
 
 ## Evidence
 

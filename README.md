@@ -36,7 +36,7 @@ your-project/
 ├── .claude/
 │   ├── settings.json      ← registers the two hooks below
 │   ├── hooks/             ← gate-check.ps1 (XML gate), budget-check.ps1 (board budgets)
-│   └── scripts/           ← gates.ps1 (verification ledger), usage.ps1 (token consumption), tests/
+│   └── scripts/           ← gates.ps1 (verification ledger), usage.ps1 (token consumption), unslop/ (prose scanner + hook), tests/
 │
 ├── .context/
 │   ├── identity.md

@@ -2,21 +2,30 @@
 # powershell.exe reads BOM-less scripts as ANSI, so non-ASCII bytes inside strings corrupt the parse.
 # Format and lifecycle: .context/gates-ledger.md. Tests: .claude/scripts/tests/gates.tests.ps1
 #
-#   gates.ps1 -Run    gates/<id>.md   run every CHECK, write EVIDENCE lines, exit 0 iff every CHECK gate is met
-#   gates.ps1 -Status gates/<id>.md   recompute from the file only (no execution), exit 0 iff no gate is unmet
-#   gates.ps1 -Lint   gates/<id>.md   refuse gates that cannot fail, exit 0 iff clean
+#   gates.ps1 -Run      gates/<id>.md   run the gates that are not met yet, write EVIDENCE lines
+#   gates.ps1 -Reverify gates/<id>.md   run EVERY runnable gate, met or not, and demote failures (verify-a)
+#   gates.ps1 -Status   gates/<id>.md   recompute from the file only (no execution)
+#   gates.ps1 -Lint     gates/<id>.md   refuse gates that cannot fail
+#   -TimeoutSeconds N   per-CHECK timeout (default 120); a CHECK past it is killed and recorded unmet
+#
+# Exit 0 = every runnable gate met and nothing abandoned. Exit 1 = an unmet gate or an ABANDON (a handoff).
+# Exit 64/66 = usage error / missing ledger.
 #
 # A gate is MET only when its CHECK exited 0 AND its output matched EXPECT, and the EVIDENCE line's
 # digest equals the digest of the current CHECK+EXPECT. Editing either flips the gate to unmet.
 # MANUAL gates (no CHECK) are reported as `owed` until an owner writes `EVIDENCE: owner-confirmed ...`.
+# `ABANDON: <id> <reason>` at column 1 marks a gate impossible in this task: reported owed, never run,
+# and the ledger exits 1 so the handoff is visible. Output over 1 MiB is unmet (overflow), never truncated.
 param(
-    [switch]$Run, [switch]$Status, [switch]$Lint,
+    [switch]$Run, [switch]$Reverify, [switch]$Status, [switch]$Lint,
     [Parameter(Position = 0)][string]$LedgerPath,
+    [int]$TimeoutSeconds = 120,
     [string[]]$WorkspaceRule = @()   # "<command regex>=<required flag regex>" - fill from the Project binding when the stack exists
 )
 $ErrorActionPreference = 'Stop'
-if (-not $LedgerPath) { [Console]::Error.WriteLine('usage: gates.ps1 -Run|-Status|-Lint gates/<task-id>.md'); exit 64 }
+if (-not $LedgerPath) { [Console]::Error.WriteLine('usage: gates.ps1 -Run|-Reverify|-Status|-Lint [-TimeoutSeconds N] gates/<task-id>.md'); exit 64 }
 if (-not (Test-Path -LiteralPath $LedgerPath)) { [Console]::Error.WriteLine("no such ledger: $LedgerPath"); exit 66 }
+if ($TimeoutSeconds -lt 1 -or $TimeoutSeconds -gt 86400) { [Console]::Error.WriteLine('TimeoutSeconds must be 1..86400'); exit 64 }
 
 $projectDir = $env:CLAUDE_PROJECT_DIR
 if (-not $projectDir) { $projectDir = (Get-Location).Path }
@@ -24,6 +33,7 @@ $Utf8 = New-Object System.Text.UTF8Encoding($false)
 $TaskIdPattern = '^(feat|bug|ref|res|story|spec|plan)-\d{3}$'
 $EmDash = [string][char]0x2014
 $HeaderPattern = '^## (G\d+)\s+(' + $EmDash + '|-)\s+(.+?)\s*$'   # "## G1 - title" or with an em dash
+$MaxOutputBytes = 1MB
 
 function Get-Digest([string]$check, [string]$expect) {
     $sha = [System.Security.Cryptography.SHA1]::Create()
@@ -34,11 +44,12 @@ function Get-Digest([string]$check, [string]$expect) {
 function Read-Ledger([string]$path) {
     $text = [IO.File]::ReadAllText($path, $Utf8) -replace "`r", ''
     $lines = $text -split "`n"
-    $gates = @(); $cur = $null
+    $gates = @(); $cur = $null; $abandoned = @{}
     for ($i = 0; $i -lt $lines.Count; $i++) {
         $l = $lines[$i]
+        if ($l -match '^ABANDON:\s*(G\d+)\s+(.+?)\s*$') { $abandoned[$Matches[1]] = $Matches[2]; continue }
         if ($l -match $HeaderPattern) {
-            $cur = [ordered]@{ Id = $Matches[1]; Title = $Matches[3]; Check = $null; Expect = $null; Manual = $null; Evidence = $null; Ticked = $false; HeaderLine = $i; EvidenceLine = -1; LastFieldLine = $i }
+            $cur = [ordered]@{ Id = $Matches[1]; Title = $Matches[3]; Check = $null; Expect = $null; Manual = $null; Evidence = $null; Ticked = $false; HeaderLine = $i; EvidenceLine = -1; LastFieldLine = $i; Abandon = $null }
             $gates += $cur; continue
         }
         if ($null -eq $cur) { continue }
@@ -48,11 +59,13 @@ function Read-Ledger([string]$path) {
         if ($l -match '^EVIDENCE:\s*(.*)$') { $cur.Evidence = $Matches[1].Trim(); $cur.EvidenceLine = $i; continue }
         if ($l -match '^\s*-\s*\[[xX]\]')   { $cur.Ticked = $true; continue }
     }
-    return @{ Lines = $lines; Gates = $gates }
+    foreach ($g in $gates) { if ($abandoned.ContainsKey($g.Id)) { $g.Abandon = $abandoned[$g.Id] } }
+    return @{ Lines = $lines; Gates = $gates; Abandoned = $abandoned }
 }
 
 function Get-GateState($g) {
     # met | unmet | owed, from the file alone
+    if ($g.Abandon) { return "owed (abandoned: $($g.Abandon))" }
     if ($null -eq $g.Check) {
         if ($g.Evidence -and $g.Evidence -match '^owner-confirmed\s+\S+') { return 'met (owner)' }
         return 'owed'
@@ -78,19 +91,25 @@ function Write-Evidence($ledger, $g, [string]$line) {
 }
 
 function Invoke-Check([string]$check) {
-    # Native stderr under ErrorActionPreference=Stop throws in Windows PowerShell 5.1; relax it around the call.
-    $out = ''; $code = 1
-    Push-Location $projectDir
-    $saved = $ErrorActionPreference; $ErrorActionPreference = 'Continue'
+    # The CHECK runs in a child powershell via -EncodedCommand (verbatim; -Command would strip inner quotes),
+    # with stdout+stderr redirected to temp files so a timeout can kill it without a pipe deadlock.
+    $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($check))
+    $outFile = [IO.Path]::GetTempFileName(); $errFile = [IO.Path]::GetTempFileName()
+    $code = 1; $timedOut = $false
     try {
-        # -EncodedCommand: the CHECK reaches the child verbatim; -Command would strip its inner quotes.
-        $enc = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($check))
-        $out = (& powershell -NoProfile -ExecutionPolicy Bypass -EncodedCommand $enc 2>&1 | Out-String)
-        $code = $LASTEXITCODE
-    } catch { $out = "$out`n$($_.Exception.Message)"; $code = 1 }
-    finally { $ErrorActionPreference = $saved; Pop-Location }
-    if ($null -eq $code) { $code = 0 }
-    return @{ Exit = $code; Out = ($out -replace "`r", '').Trim() }
+        $p = Start-Process -FilePath 'powershell' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $enc) `
+            -WorkingDirectory $projectDir -RedirectStandardOutput $outFile -RedirectStandardError $errFile -NoNewWindow -PassThru
+        if (-not $p.WaitForExit($TimeoutSeconds * 1000)) {
+            $timedOut = $true
+            try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch {}
+            try { $p.WaitForExit(5000) | Out-Null } catch {}
+        }
+        if (-not $timedOut) { $code = $p.ExitCode; if ($null -eq $code) { $code = 0 } }
+        $bytes = (Get-Item $outFile).Length + (Get-Item $errFile).Length
+        $out = ([IO.File]::ReadAllText($outFile) + "`n" + [IO.File]::ReadAllText($errFile)) -replace "`r", ''
+    } catch { $out = $_.Exception.Message; $code = 1; $bytes = 0 }
+    finally { Remove-Item $outFile, $errFile -Force -ErrorAction SilentlyContinue }
+    return @{ Exit = $code; Out = $out.Trim(); TimedOut = $timedOut; Overflow = ($bytes -gt $MaxOutputBytes) }
 }
 
 $ledger = Read-Ledger $LedgerPath
@@ -100,6 +119,7 @@ if ($Lint) {
     $problems = @()
     if ($name -notmatch $TaskIdPattern) { $problems += "ledger name '$name' is not a task id (feat|bug|ref|res|story|spec|plan-NNN)" }
     if ($ledger.Gates.Count -eq 0) { $problems += 'no gates found (headers look like: ## G1 - property that holds)' }
+    foreach ($id in $ledger.Abandoned.Keys) { if (-not ($ledger.Gates | Where-Object { $_.Id -eq $id })) { $problems += "ABANDON names $id, which is not a gate in this ledger" } }
     foreach ($g in $ledger.Gates) {
         $p = "$($g.Id)"
         if ($g.Title -match '^(run|check|test|verify|execute|ensure|make sure|try)\b') { $problems += "$p title is an activity ('$($g.Title)'); state the property that holds" }
@@ -115,35 +135,42 @@ if ($Lint) {
             }
         }
         if ($g.Ticked) { $problems += "$p has a hand-ticked box; only EVIDENCE lines written by -Run count" }
+        if ($g.Abandon -and $g.Abandon.Length -lt 8) { $problems += "$p ABANDON reason is too short to be a handoff" }
     }
     if ($problems.Count -eq 0) { Write-Output "lint: ok ($($ledger.Gates.Count) gates in $name)"; exit 0 }
     foreach ($x in $problems) { [Console]::Error.WriteLine("lint: $x") }
     exit 1
 }
 
-if ($Run) {
+if ($Run -or $Reverify) {
     foreach ($g in $ledger.Gates) {
+        if ($g.Abandon) { continue }
         if ($null -eq $g.Check) { if (-not $g.Evidence) { Write-Evidence $ledger $g 'EVIDENCE: owed' }; continue }
+        if ($Run -and -not $Reverify -and (Get-GateState $g) -eq 'met') { continue }   # -Run: unmet gates only
         $r = Invoke-Check $g.Check
         $matched = [regex]::IsMatch($r.Out, $g.Expect, [Text.RegularExpressions.RegexOptions]::Multiline)
-        $verdict = if ($r.Exit -eq 0 -and $matched) { 'met' } else { 'unmet' }
+        $verdict = if ($r.TimedOut) { 'unmet' } elseif ($r.Overflow) { 'unmet' } elseif ($r.Exit -eq 0 -and $matched) { 'met' } else { 'unmet' }
         $first = ($r.Out -split "`n")[0]; if ($first.Length -gt 100) { $first = $first.Substring(0, 100) }
         $first = $first -replace '"', "'"
+        if ($r.TimedOut) { $first = "timeout after ${TimeoutSeconds}s" }
+        elseif ($r.Overflow) { $first = 'output overflow (> 1 MiB); make the CHECK print less' }
         $stamp = (Get-Date).ToUniversalTime().ToString('yyyy-MM-ddTHH:mm:ssZ')
-        Write-Evidence $ledger $g "EVIDENCE: $verdict $stamp exit=$($r.Exit) digest=$(Get-Digest $g.Check $g.Expect) out=`"$first`""
+        $exitShown = if ($r.TimedOut) { 'timeout' } else { $r.Exit }
+        Write-Evidence $ledger $g "EVIDENCE: $verdict $stamp exit=$exitShown digest=$(Get-Digest $g.Check $g.Expect) out=`"$first`""
     }
     [IO.File]::WriteAllText($LedgerPath, (($ledger.Lines -join "`n").TrimEnd() + "`n"), $Utf8)
     $ledger = Read-Ledger $LedgerPath
 }
 
-# status (also printed after -Run)
-$met = 0; $unmet = 0; $owed = 0
+# status (also printed after -Run / -Reverify)
+$met = 0; $unmet = 0; $owed = 0; $abandoned = 0
 foreach ($g in $ledger.Gates) {
     $s = Get-GateState $g
-    if ($s -like 'met*') { $met++ } elseif ($s -eq 'owed') { $owed++ } else { $unmet++ }
+    if ($s -like 'met*') { $met++ } elseif ($s -like 'owed (abandoned*') { $owed++; $abandoned++ } elseif ($s -eq 'owed') { $owed++ } else { $unmet++ }
     $word = ($s -split ' ')[0]
     $why = ''; if ($s -match '\((.*)\)') { $why = " [$($Matches[1])]" }
     Write-Output ("{0,-4} {1,-6} {2}{3}" -f $g.Id, $word, $g.Title, $why)
 }
-Write-Output "${name}: $($ledger.Gates.Count) gates - $met met, $unmet unmet, $owed owed"
-if ($unmet -gt 0) { exit 1 } else { exit 0 }
+$suffix = if ($abandoned -gt 0) { " ($abandoned abandoned)" } else { '' }
+Write-Output "${name}: $($ledger.Gates.Count) gates - $met met, $unmet unmet, $owed owed$suffix"
+if ($unmet -gt 0 -or $abandoned -gt 0) { exit 1 } else { exit 0 }

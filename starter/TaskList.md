@@ -37,15 +37,15 @@ When a story and its spec describe the same feature, reuse the slug (e.g. `dashb
 
 *Active work. Should usually have exactly 1 item. More than 2 = drift.*
 
-### plan: [slug] — [first-id]..[last-id] — in-progress since [YYYY-MM-DD] — [pointer]
-
-- [ ] [task-id] — [one-line goal] — in-progress [YYYY-MM-DD]
+- [ ] [task-id] — [one-line goal] — [risk] — spec `planning/specs/[slug].md`, ledger `gates/[task-id].md`
 
 ## Ready
 
-*Approved XML tasks, not yet started. Pick from the top.*
+*Approved XML tasks, not yet started. Pick from the top. One plan header per plan, then its rows.*
 
-- [ ] [task-id] — [one-line goal] — ready
+**plan-[slug] — 0/[total]** (approved [YYYY-MM-DD]). Plan `planning/plans/[slug].md` · spec `planning/specs/[slug].md` · dossier `planning/done-plans/[slug].md`. Next: [task-id].
+
+- [ ] [task-id] — [one-line goal] — [low|high] — [depends: id or none] — [pointer]
 
 ## Backlog
 

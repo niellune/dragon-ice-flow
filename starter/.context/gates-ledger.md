@@ -23,26 +23,29 @@ EVIDENCE: owed
 - EXPECT for a test lane pins self-consistency, never a count: `(\d+) run, \1 passed`, not `12 passed`.
 - The ledger name is the task id (`feat|bug|ref|res|story|spec|plan-NNN`). The linter refuses anything else.
 - Keep CHECK and EXPECT ASCII. Output is captured through the console code page, so a non-ASCII character in the output (an em dash, say) may arrive as `-` or `?` and never match.
+- `ABANDON: <id> <reason>` at column 1, only when the outcome is genuinely impossible in the authorized task (needs the owner, hardware, a deploy). The gate is reported **owed (abandoned)**, never run, and the ledger exits 1: a visible handoff, not a pass. Closeout turns it into `gate-owed? yes` on the board row and a line under **Owed** in the dossier.
+- A CHECK past the timeout is killed and recorded `exit=timeout`, unmet. Output over 1 MiB is unmet (overflow), never truncated into a pass; make the CHECK print less (a summary line, `| Select-Object -Last 5`).
 
 ## Commands
 
 | Command | Does | Exit 0 when |
 |---|---|---|
 | `gates.ps1 -Lint gates/<id>.md` | Refuses gates that cannot fail | No lint finding |
-| `gates.ps1 -Run gates/<id>.md` | Runs every CHECK, writes EVIDENCE lines, prints status | Every CHECK gate met (owed gates do not fail it) |
-| `gates.ps1 -Status gates/<id>.md` | Recomputes from the file alone, no execution | No gate unmet |
+| `gates.ps1 -Run gates/<id>.md` | Runs the gates **not yet met**, writes EVIDENCE lines, prints status | Every runnable gate met and nothing abandoned |
+| `gates.ps1 -Reverify gates/<id>.md` | Runs **every** runnable gate, met or not, and demotes failures | same |
+| `gates.ps1 -Status gates/<id>.md` | Recomputes from the file alone, no execution | No gate unmet and nothing abandoned |
 
-Add `-WorkspaceRule '<command regex>=<flag regex>'` to the lint call when the stack has a workspace-wide test command that needs a package flag; put the rule in the Project binding of `.context/multi-agent-pipeline.md` so every role passes the same one.
+`-TimeoutSeconds N` (default 120) bounds each CHECK; pass a larger value for a real test lane. Add `-WorkspaceRule '<command regex>=<flag regex>'` to the lint call when the stack has a workspace-wide test command that needs a package flag; put both values in the Project binding of `.context/multi-agent-pipeline.md` so every role passes the same ones.
 
 ## Lifecycle
 
 | Stage | Does with the ledger |
 |---|---|
-| Spec | Writes it (standard gates + feature gates), runs `-Lint`, commits it. `<verify>` in the XML task names the ledger and gate ids. |
-| Implementer | Runs `-Run` **once**, when the diff is ready. Commits the evidence lines with the diff. |
-| Verify-a (code vs spec) | Runs `-Run` again: the feature's **one** re-execution. Nobody runs the lanes after this. |
+| Spec | Writes it (standard gates + feature gates), runs `-Lint` and `-Status`, commits it. Never runs it. `<verify>` in the XML task names the ledger and gate ids. |
+| Implementer | Runs `-Run` when the diff is ready; iterates with the inner loop, not by re-running the ledger (`-Run` re-executes only what is still unmet). Commits the evidence lines with the diff. |
+| Verify-a (code vs spec) | Runs `-Reverify`: the feature's **one** re-execution. Nobody runs the lanes after this. A pass that did not re-verify has not verified. |
 | Verify-b (spec vs intent) | Reads `-Status` only. Any unmet gate is a fail. Never executes. |
-| Closeout | Pastes the EVIDENCE lines verbatim into the dossier, lists owed gates under **Owed**, deletes `gates/<id>.md`. |
+| Closeout | Pastes the EVIDENCE lines verbatim into the dossier, lists owed and abandoned gates under **Owed**, sets `gate-owed? yes` on the board row when any are, deletes `gates/<id>.md`. |
 
 ## Linter rules
 
@@ -57,6 +60,7 @@ Each refuses a gate that cannot fail or a ledger that cannot be traced:
 | missing pair | CHECK without EXPECT, or a gate with neither CHECK nor MANUAL |
 | hand tick | Any `- [x]` line inside a gate |
 | workspace flag | With `-WorkspaceRule`, a CHECK matching the command regex but not the flag regex |
+| abandon | An `ABANDON:` naming a gate that is not in the ledger, or with a reason too short to be a handoff |
 
 ## Standard gates
 
@@ -70,7 +74,7 @@ Every feature ledger starts with these; the spec adds feature-specific gates aft
 | board budget | `powershell -NoProfile -File .claude/hooks/budget-check.ps1 -All` | `^budget-check: ok` |
 | zero CR | `git diff --name-only <baseline>..HEAD \| ForEach-Object { if (Select-String -Path $_ -Pattern '\r' -Quiet) { 'CR: ' + $_ } }; 'scanned'` | `^scanned$` |
 | ledger tests | `powershell -NoProfile -File .claude/scripts/tests/gates.tests.ps1` | `(\d+) run, \1 passed` (only for tasks that touch the runner) |
-| prose | _deferred: playbook R8, wired once a corpus exists_ | |
+| prose (tasks that write markdown) | `powershell -NoProfile -File .claude/scripts/unslop/unslop.ps1 <the files the task writes>` | `^unslop: 0 findings` |
 
 ## Proofs on record
 

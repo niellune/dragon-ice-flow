@@ -25,6 +25,10 @@ function Copy-Fixture([string]$rel) {
     Copy-Item (Join-Path $fx $rel) $dst -Force
     return $dst
 }
+function Get-Evidence([string]$path, [string]$id) {
+    $t = [IO.File]::ReadAllText($path)
+    if ($t -match "(?s)## $id .*?\nEVIDENCE: (\S+ \S+)") { return $Matches[1] } else { return '' }
+}
 
 # --- lint: good ledger passes
 $r = Invoke-Gates @('-Lint', (Join-Path $fx 'good/ref-900.md'))
@@ -75,16 +79,53 @@ Assert 'run: failing check is unmet' ($r.Exit -ne 0 -and $r.Out -match 'G1\s+unm
 $r = Invoke-Gates @('-Status', $led)
 Assert 'status: met after run' ($r.Exit -eq 0 -and $r.Out -match '2 met, 0 unmet') $r.Out
 
+# --- run: only unmet gates re-execute; -Reverify re-executes all
+$g1Before = Get-Evidence $led 'G1'
+$edited = [IO.File]::ReadAllText($led) -replace 'CHECK: 2 \+ 2', 'CHECK: 2 + 3'
+[IO.File]::WriteAllText($led, $edited)
+Start-Sleep -Seconds 1
+$r = Invoke-Gates @('-Run', $led)
+Assert 'run: unmet-only leaves the met gate untouched' ((Get-Evidence $led 'G1') -eq $g1Before -and $r.Out -match 'G2\s+unmet') ("before=$g1Before after=" + (Get-Evidence $led 'G2'))
+Start-Sleep -Seconds 1
+$r = Invoke-Gates @('-Reverify', $led)
+Assert 'reverify: re-executes the met gate too' ((Get-Evidence $led 'G1') -ne $g1Before) ("before=$g1Before after=" + (Get-Evidence $led 'G1'))
+
 # --- tamper: editing EXPECT flips to unmet without a re-run
-$tampered = [IO.File]::ReadAllText($led) -replace 'EXPECT: \^hello\$', 'EXPECT: ^hello world$'
-[IO.File]::WriteAllText($led, $tampered)
-$r = Invoke-Gates @('-Status', $led)
+$led3 = Copy-Fixture 'good/ref-900.md'
+$null = Invoke-Gates @('-Run', $led3)
+$tampered = [IO.File]::ReadAllText($led3) -replace 'EXPECT: \^hello\$', 'EXPECT: ^hello world$'
+[IO.File]::WriteAllText($led3, $tampered)
+$r = Invoke-Gates @('-Status', $led3)
 Assert 'tamper: edited EXPECT reports unmet (digest mismatch)' ($r.Exit -ne 0 -and $r.Out -match 'G1\s+unmet.*digest mismatch') $r.Out
 
 # --- manual gate reports owed
-$led3 = Copy-Fixture 'manual/ref-906.md'
-$r = Invoke-Gates @('-Run', $led3)
+$led4 = Copy-Fixture 'manual/ref-906.md'
+$r = Invoke-Gates @('-Run', $led4)
 Assert 'manual: reported owed, not unmet' ($r.Exit -eq 0 -and $r.Out -match 'G2\s+owed' -and $r.Out -match '0 unmet, 1 owed') $r.Out
+
+# --- timeout: a CHECK past the budget is killed and recorded unmet
+$led5 = Copy-Fixture 'timeout/ref-907.md'
+$sw = [Diagnostics.Stopwatch]::StartNew()
+$r = Invoke-Gates @('-Run', $led5, '-TimeoutSeconds', '1')
+$sw.Stop()
+$txt5 = [IO.File]::ReadAllText($led5)
+Assert 'timeout: gate unmet with timeout evidence' ($r.Exit -ne 0 -and $txt5 -match 'EVIDENCE: unmet \S+ exit=timeout') $txt5
+Assert 'timeout: runner returned well before the CHECK would have' ($sw.Elapsed.TotalSeconds -lt 15) ("took " + $sw.Elapsed.TotalSeconds)
+
+# --- abandon: reported owed, never run, exit 1 (visible handoff); lint accepts it
+$led6 = Copy-Fixture 'abandon/ref-908.md'
+$r = Invoke-Gates @('-Lint', $led6)
+Assert 'abandon: lint accepts a reasoned ABANDON' ($r.Exit -eq 0) $r.Out
+$r = Invoke-Gates @('-Run', $led6)
+$txt6 = [IO.File]::ReadAllText($led6)
+Assert 'abandon: G2 owed as abandoned, exit 1' ($r.Exit -eq 1 -and $r.Out -match 'G2\s+owed.*abandoned' -and $r.Out -match '1 abandoned') $r.Out
+Assert 'abandon: abandoned gate was never executed' (-not ($txt6 -match '(?s)## G2 .*?EVIDENCE:')) $txt6
+
+# --- overflow: output over 1 MiB is unmet, never truncated into a pass
+$led7 = Copy-Fixture 'overflow/ref-909.md'
+$r = Invoke-Gates @('-Run', $led7)
+$txt7 = [IO.File]::ReadAllText($led7)
+Assert 'overflow: gate unmet with overflow evidence' ($r.Exit -ne 0 -and $txt7 -match 'output overflow') $txt7
 
 Remove-Item -Recurse -Force $tmp
 Write-Output "$($script:run) run, $($script:passed) passed"

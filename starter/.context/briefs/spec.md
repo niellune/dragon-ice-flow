@@ -20,14 +20,15 @@ Role: TIER-2 subagent. Writes the spec, the gate ledger and the XML task(s) for 
 
 - `planning/specs/<slug>.md` — per §3: file paths; code to reuse; acceptance criteria (every AC about existing code cites `file:line` opened this round); out-of-scope; ordering; stated assumptions; findings tagged `fact` / `spec-surprise` / `plan-conflict`; proposed map delta; risk confirmation; **the map sections touched**, by heading; per task, what shipped path it protects and why (pins, golden files, shims are owed only there).
 - The XML task(s) in the plan file, in the task format, `<verify>` naming `gates/<id>.md` and gate ids.
-- `gates/<id>.md` — the ledger, linted (`gates.ps1 -Lint`).
-- `planning/rounds/<id>/assumptions.md` — the stated assumptions, one per line, for both verifiers.
-- Board row moved to Ready.
-- All committed by you, by pathspec.
+- `gates/<id>.md` — the ledger, linted (`gates.ps1 -Lint`) and status-checked (`-Status`). **Never run it**: executing gates is the implementer's job.
+- `planning/rounds/<id>/assumptions.md` — the stated assumptions, one per line, for both verifiers; its header lists the map sections touched, so verify-b gets them without the spec body.
+- Board row moved to In Progress; one spec-round entry in `wiki/log.md`.
+- **One commit** `[<id>] spec round: <title>` with all of the above. Nothing under `src/`.
 
 ## Return
 
-- Commit hash.
+- Commit hash. Wall-clock, tool-use count.
 - Risk: `confirmed` or `raised to high` (never lowered).
+- Gate count (runnable / manual), the lint and status result lines.
 - Findings with tags. A `plan-conflict`, or "blocked: <why>", is the first line.
 - A task expected past ~2 hours or 150 tool uses is split before dispatch; name the seam.

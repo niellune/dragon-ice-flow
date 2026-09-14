@@ -66,12 +66,13 @@ Multi-task:
 
 ## Closeout Rule
 
-Every close writes these rows, filled in, never paraphrased:
+Every board write uses these rows, filled in, never paraphrased:
 
-- Board Done row: `- [x] ID — title — DONE YYYY-MM-DD — commit — gate-owed? — pointer`
-- Board plan header: `### plan: slug — first-id..last-id — status since YYYY-MM-DD — pointer`
+- Ready row: `- [ ] ID — title — risk — depends — pointer`
+- Done row: `- [x] ID — title — DONE YYYY-MM-DD — commit — gate-owed? — pointer`
+- Plan header, one line: `**plan-slug — done/total** (approved YYYY-MM-DD). Plan \`path\` · spec \`path\` · dossier \`path\`. Next: ID.`
 
-Detail (numbers, findings, owed gates, lessons) goes to the dossier or `wiki/log.md`, never the row. At every plan close, run housekeeping Rules 1 + 5 (`.context/housekeeping.md`) before the closing commit.
+`gate-owed?` is `yes` when the ledger closed with an owed or abandoned gate. Detail (numbers, findings, owed gates, lessons) goes to the dossier or `wiki/log.md`, never the row. New backlog items: one line in `planning/backlog.md` and a bumped count on the board, no row. At every plan close, run housekeeping Rules 1 + 5 (`.context/housekeeping.md`) before the closing commit.
 
 Budgets are mechanical: `.claude/hooks/budget-check.ps1` holds the file and row limits, runs as a PostToolUse hook on every write, and as `-All` during housekeeping. A refused write means trim the row, not the rule.
 

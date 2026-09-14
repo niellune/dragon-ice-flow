@@ -158,9 +158,15 @@ Never the session that wrote the code. Two checks, both required, and the second
 
 An output missing this section is not a verify result. A violated assumption is a `plan-conflict`, not a code defect.
 
+A `✗` whose evidence points at a stale *record* (an outdated code comment, a spec typo, a superseded reference line) rather than wrong code is marked `✗ record-error suspected`: same routing, pre-triaged for adjudication.
+
 **Map delta sanity check.** Does the delta match what the diff actually changed? A mismatch is feedback to the implementer, not a fail on its own.
 
-Output: pass/fail plus feedback specific enough to act on.
+**Lane-selection check (verify-a).** Confirm the documented test lane actually *compiles and executes* tests covering the touched files, not just that it ran green. A lane that physically cannot see the touched file is the classic verify escape (a feature-gated or member-package file whose tests never built). Name the lane per touched file, with evidence.
+
+**Record-error fix-at-source rule.** When a `✗` is adjudicated a record error (the code stands, no fix round), the same closeout fixes the stale record at its source, whatever durable file holds it: a code comment, a spec, `reference/`, the wiki. A wrong record that survives adjudication unfixed misleads the next blinded pass too.
+
+Output: pass/fail plus feedback specific enough to act on. Every pass records its wall-clock and tool-use count in its round file; that is the only source for the stage-cost table.
 
 ---
 
@@ -206,8 +212,11 @@ Costs are recorded per stage so that "make it cheaper" lands where the cost is, 
 **Spike lane.** A task that ships nothing (its deliverable is a written finding) keeps the spec round and verify-b, drops verify-a, and batches its closeout with the plan's. Eligibility is per task, never per plan:
 
 - deliverable is a finding in `wiki/` or `planning/`, not a diff under `src/`;
-- no shipped path reads anything it writes;
-- its ledger has no test-lane gate (only the board-budget, zero-CR and prose gates).
+- no shipped path reads anything it writes: no production lever, no golden row, no pin to defend;
+- it touches no wire, protocol constant, format version, or deployed artifact;
+- its code lands on a branch that is discarded, or is reverted before the plan closes.
+
+A task failing any one runs the full lane, even inside a spike plan. The moment a spike's code is wanted in production it becomes an ordinary feature with a spec round and two blinded passes: the numbers do not carry the code across. A number measured on throwaway-shaped code is recorded **with that fact**, every time; a number that forgets its provenance gets quoted later as if it did not.
 
 **Verify-cost review, pre-committed.** Trigger: the first plan to close after **five** features have closed under this pipeline. Rulings already made: the review reads the stage-cost table and the dossiers' verify-cost blocks; it may re-tier the implementer or re-scope spec depth; it may not remove verify-b, merge the two passes, or cut the spec round (rulings 1 and 2 above). Output: `planning/done-plans/verify-cost-review-YYYY-MM.md`, citing the dossiers it read.
 

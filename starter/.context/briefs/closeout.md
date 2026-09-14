@@ -15,8 +15,9 @@ Role: TIER-3 subagent. Mechanical: applies, records, files. Authors nothing from
 - Source files — you apply a delta, you do not read code
 - `wiki/log.md`, `wiki/log/`, `planning/done-plans/*` whole (grep to append or to check a fact)
 
-## Do
+## Do (commit order)
 
+- **Step 1 — record errors fixed at source.** Every `✗` in `verify-a.md` / `verify-b.md` adjudicated a record error (code stands, no fix round): fix the stale text where it lives — a code comment, a spec, `reference/`, a wiki page. Own commit `[<id>] record fix at source: <what>`. Skip if none. A wrong record that survives unfixed fails the next checklist too.
 - **Apply the verified map delta** from `implement.md` (as confirmed in `verify-a.md`). Apply only. Missing or contradicting the map → stop and report; never invent.
 - Board: Done row exactly per the Closeout Rule template; update the plan header. Plan deviations → one line in the log entry, never the row.
 - Log: one entry, head `## [YYYY-MM-DD] <kind> | <title>`, short note. Kinds: the list in the log header.
@@ -28,7 +29,10 @@ Role: TIER-3 subagent. Mechanical: applies, records, files. Authors nothing from
 
 - `TaskList.md`, `STATE.md`, `wiki/log.md`, the map; at plan close also the dossier and `planning/done-plans.md`.
 
+- Final commit `[<id>] closeout: <title>` with the board, state, log, map and (at plan close) the dossier.
+
 ## Return
 
-- Commit hash(es).
+- Commit hash(es). `git status --short` (expect empty). Byte sizes of `TaskList.md` and `STATE.md`.
 - `done`, or `stopped: <reason>` (delta missing/contradicting, budget refused, gate unmet).
+- Wall-clock, tool-use count.
