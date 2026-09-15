@@ -108,8 +108,8 @@ For an active project at month 6:
 | `CONTEXT.md` | ~600 | 800 |
 | `STATE.md`, `TaskList.md` | mechanical — file and row limits live only in `.claude/hooks/budget-check.ps1` (hook on every write; `-All` in housekeeping) | same |
 | `.context/rules.md` | ~500 (filled in) | 800 |
-| `.context/task-workflow.md` | ~480 (incl. gate table) | 600 |
-| **Always-load total** | **~3,500** | **5,000** |
+| `.context/task-workflow.md` | ~1,000 (gate table + Closeout Rule are canonical here and cannot move) | 1,200 |
+| **Always-load total** | **~4,000** | **5,500** |
 | Workspace files | 300–1400 each | 1500 |
 | `wiki/index.md` | ~600 (~50 entries) | 1200 |
 | Planning indexes (each) | ~200 | 500 |

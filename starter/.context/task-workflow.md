@@ -78,14 +78,7 @@ Budgets are mechanical: `.claude/hooks/budget-check.ps1` holds the file and row 
 
 ## Enforcement (hook)
 
-The code gate is enforced mechanically by a PreToolUse hook (`.claude/hooks/gate-check.ps1`, registered in `.claude/settings.json`): `Edit`/`Write` to `src/`, `reference/`, or `.context/` is blocked unless the sentinel file `.claude/gate-open` exists.
-
-Sentinel lifecycle:
-1. User approves the XML task → create the sentinel: `echo approved > .claude/gate-open`
-2. Execute the task, verify, commit.
-3. Delete the sentinel: `rm .claude/gate-open` (or `Remove-Item`). Never leave it open between tasks.
-
-The sentinel is gitignored. If the hook blocks a write you believe is exempt, check the "Which Gate Covers What" table — bookkeeping files are outside the gated paths by design.
+A PreToolUse hook blocks `Edit`/`Write` to the gated paths unless `.claude/gate-open` exists; the sentinel is created on approval and deleted after the commit. Lifecycle and troubleshooting → `.context/task-workflow-appendix.md ## Enforcement (hook)`.
 
 ## More
 

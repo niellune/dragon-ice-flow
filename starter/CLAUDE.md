@@ -23,18 +23,13 @@
 
 **Root files (always-load):** `CLAUDE.md` · `CONTEXT.md` · `STATE.md` · `TaskList.md`
 
-**`.context/`** — canonical project rules:
-- `identity.md` · `rules.md` · `glossary.md`
-- `task-workflow.md` (gate; always-load) · `task-workflow-appendix.md` (on-demand)
-- `multi-agent-pipeline.md` (on-demand index) · `pipeline/00..09-*.md` (one section each: binding, roles, planning, orchestration, spec, implementation, verification, closeout, cost rule, standing constraints; load only the section named)
-- `briefs/` (one per pipeline role + `_common.md`; each role reads only its own) · `gates-ledger.md` (verification ledger format)
-- `housekeeping.md` (on-demand)
+**`.context/`** — canonical project rules: `identity.md` · `rules.md` · `glossary.md` · `task-workflow.md` (gate; always-load) · `task-workflow-appendix.md` · `multi-agent-pipeline.md` (index over `pipeline/00..09-*.md`; load only the section named) · `briefs/` (one per pipeline role + `_common.md`) · `gates-ledger.md` · `housekeeping.md`
 
 **`workspaces/`** — task-type contexts: `feature-development/`, `debugging/`, `refactoring/`, `planning/`, `research/`
 
 **`skills/`** — on-demand thinking: `brainstorm/` · `unslop/` (prose audit and repair; scanner in `.claude/scripts/unslop/`, wired as a PostToolUse hook on records)
 
-**`planning/`** — artifacts: `stories/`, `specs/`, `plans/` (each has `index.md`) · `backlog.md` · `rounds/<id>/` (per-role round files) · `done-plans.md` + `done-plans/` (dossiers) · `_archive/`
+**`planning/`** — `stories/`, `specs/`, `plans/` (each with `index.md`) · `backlog.md` · `rounds/<id>/` · `done-plans.md` + `done-plans/` · `_archive/`
 
 **`gates/`** — one verification ledger per feature in flight, nothing else
 
