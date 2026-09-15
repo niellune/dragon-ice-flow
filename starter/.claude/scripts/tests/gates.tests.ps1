@@ -55,7 +55,7 @@ $r = Invoke-Gates @('-Lint', (Join-Path $fx 'hand-tick/ref-904.md'))
 Assert 'lint: hand-ticked box rejected' ($r.Exit -ne 0 -and $r.Out -match 'hand-ticked') $r.Out
 
 # --- lint: workspace flag rule
-$r = Invoke-Gates @('-Lint', (Join-Path $fx 'good/ref-900.md'), '-WorkspaceRule', 'Write-Output=--nope')
+$r = Invoke-Gates @('-Lint', (Join-Path $fx 'good/ref-900.md'), '-WorkspaceRule', 'Join=--nope')
 Assert 'lint: workspace rule fires when flag missing' ($r.Exit -ne 0 -and $r.Out -match 'workspace flag') $r.Out
 
 # --- status: hand-ticked box with no evidence line is unmet
@@ -126,6 +126,23 @@ $led7 = Copy-Fixture 'overflow/ref-909.md'
 $r = Invoke-Gates @('-Run', $led7)
 $txt7 = [IO.File]::ReadAllText($led7)
 Assert 'overflow: gate unmet with overflow evidence' ($r.Exit -ne 0 -and $txt7 -match 'output overflow') $txt7
+
+# --- lint: tautological CHECK (prints its own EXPECT) is refused
+$r = Invoke-Gates @('-Lint', (Join-Path $fx 'bad-tautology/ref-911.md'))
+Assert 'lint: tautological check rejected' ($r.Exit -ne 0 -and $r.Out -match 'only prints its own EXPECT') $r.Out
+
+# --- lint: mostly-manual ledger warns, and fails only under -Strict
+$r = Invoke-Gates @('-Lint', (Join-Path $fx 'mostly-manual/ref-912.md'))
+Assert 'lint: mostly-manual warns without failing' ($r.Exit -eq 0 -and $r.Out -match 'lint: warn ledger is mostly manual') $r.Out
+$r = Invoke-Gates @('-Lint', (Join-Path $fx 'mostly-manual/ref-912.md'), '-Strict')
+Assert 'lint: mostly-manual fails under -Strict' ($r.Exit -ne 0) $r.Out
+
+# --- timeout: the CHECK's own child processes are killed with it (process tree)
+$led8 = Copy-Fixture 'tree-kill/ref-913.md'
+$r = Invoke-Gates @('-Run', $led8, '-TimeoutSeconds', '2')
+Start-Sleep -Seconds 1
+$lingering = @(Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'tree-kill-marker-7f3a' }).Count
+Assert 'timeout: grandchild process does not outlive the gate' ($r.Exit -ne 0 -and $lingering -eq 0) ("lingering=$lingering " + $r.Out)
 
 Remove-Item -Recurse -Force $tmp
 Write-Output "$($script:run) run, $($script:passed) passed"

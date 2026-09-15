@@ -61,3 +61,6 @@ tmp/
 
 # XML task gate sentinel (created on task approval, deleted after commit)
 .claude/gate-open
+
+# Claude Code harness-local permissions; never committed
+.claude/settings.local.json

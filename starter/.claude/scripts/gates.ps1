@@ -17,7 +17,7 @@
 # `ABANDON: <id> <reason>` at column 1 marks a gate impossible in this task: reported owed, never run,
 # and the ledger exits 1 so the handoff is visible. Output over 1 MiB is unmet (overflow), never truncated.
 param(
-    [switch]$Run, [switch]$Reverify, [switch]$Status, [switch]$Lint,
+    [switch]$Run, [switch]$Reverify, [switch]$Status, [switch]$Lint, [switch]$Strict,
     [Parameter(Position = 0)][string]$LedgerPath,
     [int]$TimeoutSeconds = 120,
     [string[]]$WorkspaceRule = @()   # "<command regex>=<required flag regex>" - fill from the Project binding when the stack exists
@@ -101,6 +101,9 @@ function Invoke-Check([string]$check) {
             -WorkingDirectory $projectDir -RedirectStandardOutput $outFile -RedirectStandardError $errFile -NoNewWindow -PassThru
         if (-not $p.WaitForExit($TimeoutSeconds * 1000)) {
             $timedOut = $true
+            # Kill the whole process tree: a test runner the CHECK spawned must not outlive the gate.
+            $taskkill = Join-Path $env:SystemRoot 'System32\taskkill.exe'
+            if (Test-Path $taskkill) { $null = & $taskkill /PID $p.Id /T /F 2>&1 }
             try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch {}
             try { $p.WaitForExit(5000) | Out-Null } catch {}
         }
@@ -136,8 +139,17 @@ if ($Lint) {
         }
         if ($g.Ticked) { $problems += "$p has a hand-ticked box; only EVIDENCE lines written by -Run count" }
         if ($g.Abandon -and $g.Abandon.Length -lt 8) { $problems += "$p ABANDON reason is too short to be a handoff" }
+        # tautological: the CHECK merely prints a literal that is its own EXPECT; it observes nothing.
+        if ($g.Check -and $g.Expect -and $g.Check -match "^\s*(?:Write-Output|Write-Host|echo|'|`")\s*['`"]?(.+?)['`"]?\s*$") {
+            $literal = $Matches[1].Trim(); $bare = ($g.Expect -replace '^\^', '') -replace '\$$', ''
+            if ($literal -eq $bare -or $literal -eq $g.Expect) { $problems += "$p CHECK only prints its own EXPECT ('$literal'); observe the artifact the title names" }
+        }
     }
-    if ($problems.Count -eq 0) { Write-Output "lint: ok ($($ledger.Gates.Count) gates in $name)"; exit 0 }
+    $warnings = @()
+    $manual = @($ledger.Gates | Where-Object { $null -eq $_.Check }).Count
+    if ($ledger.Gates.Count -gt 0 -and $manual * 2 -gt $ledger.Gates.Count) { $warnings += "ledger is mostly manual ($manual of $($ledger.Gates.Count) gates have no CHECK); a runnable gate per acceptance criterion is the norm" }
+    foreach ($w in $warnings) { [Console]::Error.WriteLine("lint: warn $w") }
+    if ($problems.Count -eq 0 -and -not ($Strict -and $warnings.Count -gt 0)) { Write-Output "lint: ok ($($ledger.Gates.Count) gates in $name)"; exit 0 }
     foreach ($x in $problems) { [Console]::Error.WriteLine("lint: $x") }
     exit 1
 }

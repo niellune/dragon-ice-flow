@@ -1,18 +1,23 @@
 # usage.ps1 - token consumption over Claude Code transcripts, main vs subagent (playbook R10). Zero dependencies. ASCII only.
 #
-#   usage.ps1 [-Project <slug>] [-By week|day|session] [-Since yyyy-MM-dd] [-Root <dir>]
+#   usage.ps1 [-Project <slug>] [-By week|day|session] [-Kind all|main|sub] [-Since yyyy-MM-dd|all] [-Until yyyy-MM-dd] [-Json] [-Root <dir>]
 #
 # Reads ~/.claude/projects/<slug>/*.jsonl (main sessions) and <slug>/<session>/subagents/*.jsonl (subagents).
 # The slug defaults to CLAUDE_PROJECT_DIR (or the current directory) with ':' and path separators replaced by '-'.
 # One API response can appear as several assistant lines (one per content block); a turn is counted once per requestId.
+# Defaults: -By week, -Kind all, -Since 14 days ago (pass 'all' for everything).
 # Columns: turns, prompts (user messages that are not tool results), tool uses, cached input (cache reads),
 # uncached input (input + cache creation), output, mean and peak context per turn (all input tokens of a request),
-# input per output token, output per tool use, compactions (compact-summary lines). Run weekly; record the mean
-# context figures in the housekeep log entry; re-cut whatever the context-per-turn column says is growing.
+# input per output token, output per tool use, compactions, span_h (first to last turn, hours) and active_h (sum of
+# inter-turn gaps of 15 minutes or less: the wall-clock figure a dossier records). Run weekly; record mean_ctx and
+# active_h in the housekeep log entry; re-cut whatever the context-per-turn column says is growing.
 param(
     [string]$Project,
     [ValidateSet('week', 'day', 'session')][string]$By = 'week',
+    [ValidateSet('all', 'main', 'sub')][string]$Kind = 'all',
     [string]$Since,
+    [string]$Until,
+    [switch]$Json,
     [string]$Root = (Join-Path $HOME '.claude/projects')
 )
 $ErrorActionPreference = 'Stop'
@@ -24,7 +29,9 @@ if (-not $Project) {
 }
 $base = Join-Path $Root $Project
 if (-not (Test-Path -LiteralPath $base)) { [Console]::Error.WriteLine("no transcripts at $base"); exit 66 }
-$sinceDate = if ($Since) { [datetime]::Parse($Since) } else { [datetime]::MinValue }
+$sinceDate = if (-not $Since) { (Get-Date).ToUniversalTime().Date.AddDays(-14) } elseif ($Since -eq 'all') { [datetime]::MinValue } else { [datetime]::Parse($Since) }
+$untilDate = if ($Until) { [datetime]::Parse($Until).AddDays(1) } else { [datetime]::MaxValue }
+$ActiveGapMinutes = 15
 
 $rxType    = [regex]'"type":"(assistant|user)"'
 $rxReq     = [regex]'"requestId":"([^"]+)"'
@@ -54,7 +61,7 @@ $rows = @{}   # key "scope|group" -> accumulator
 function Get-Row([string]$scope, [string]$group) {
     $k = "$scope|$group"
     if (-not $rows.ContainsKey($k)) {
-        $rows[$k] = [ordered]@{ scope = $scope; group = $group; sessions = @{}; turns = 0; prompts = 0; tools = 0; cached = 0L; uncached = 0L; output = 0L; ctxSum = 0L; ctxPeak = 0L; compactions = 0 }
+        $rows[$k] = [ordered]@{ scope = $scope; group = $group; sessions = @{}; turns = 0; prompts = 0; tools = 0; cached = 0L; uncached = 0L; output = 0L; ctxSum = 0L; ctxPeak = 0L; compactions = 0; stamps = (New-Object System.Collections.ArrayList) }
     }
     return $rows[$k]
 }
@@ -66,6 +73,7 @@ Get-ChildItem -LiteralPath $base -Directory | ForEach-Object {
     $sess = $_.Name
     if (Test-Path -LiteralPath $sub) { Get-ChildItem -LiteralPath $sub -Filter '*.jsonl' -File | ForEach-Object { $files += [pscustomobject]@{ Path = $_.FullName; Scope = 'sub'; Session = $sess } } }
 }
+if ($Kind -ne 'all') { $files = @($files | Where-Object { $_.Scope -eq $Kind }) }
 
 foreach ($f in $files) {
     $seen = @{}
@@ -75,7 +83,7 @@ foreach ($f in $files) {
             $m = $rxType.Match($line); if (-not $m.Success) { continue }
             $ts = $rxStamp.Match($line); if (-not $ts.Success) { continue }
             $t = [datetime]::Parse($ts.Groups[1].Value, [Globalization.CultureInfo]::InvariantCulture, [Globalization.DateTimeStyles]::AdjustToUniversal)
-            if ($t -lt $sinceDate) { continue }
+            if ($t -lt $sinceDate -or $t -ge $untilDate) { continue }
             $row = Get-Row $f.Scope (Get-GroupKey $t $f.Session)
             $row.sessions[$f.Session] = $true
             if ($rxCompact.IsMatch($line)) { $row.compactions++ }
@@ -95,6 +103,7 @@ foreach ($f in $files) {
             $ctx = $in + $cr + $rd
             $row.turns++; $row.cached += $rd; $row.uncached += ($in + $cr); $row.output += $out
             $row.ctxSum += $ctx; if ($ctx -gt $row.ctxPeak) { $row.ctxPeak = $ctx }
+            [void]$row.stamps.Add($t)
         }
     } finally { $reader.Dispose() }
 }
@@ -103,17 +112,27 @@ $out = $rows.Values | Sort-Object { $_.group }, { $_.scope } | ForEach-Object {
     $meanCtx = if ($_.turns) { [math]::Round($_.ctxSum / $_.turns) } else { 0 }
     $inPerOut = if ($_.output) { [math]::Round(($_.cached + $_.uncached) / $_.output, 1) } else { 0 }
     $outPerTool = if ($_.tools) { [math]::Round($_.output / $_.tools) } else { 0 }
+    $span = 0.0; $active = 0.0
+    if ($_.stamps.Count -gt 1) {
+        $sorted = @($_.stamps | Sort-Object)
+        $span = [math]::Round(($sorted[-1] - $sorted[0]).TotalHours, 2)
+        $gap = 0.0
+        for ($i = 1; $i -lt $sorted.Count; $i++) { $d = ($sorted[$i] - $sorted[$i - 1]).TotalMinutes; if ($d -le $ActiveGapMinutes) { $gap += $d } }
+        $active = [math]::Round($gap / 60, 2)
+    }
     [pscustomobject]@{
         group = $_.group; scope = $_.scope; sessions = $_.sessions.Count; turns = $_.turns; prompts = $_.prompts; tool_uses = $_.tools
         cached_in = $_.cached; uncached_in = $_.uncached; output = $_.output
         mean_ctx = $meanCtx; peak_ctx = $_.ctxPeak; in_per_out = $inPerOut; out_per_tool = $outPerTool; compactions = $_.compactions
+        span_h = $span; active_h = $active
     }
 }
-if (-not $out) { Write-Output "no turns found under $base"; exit 0 }
-Write-Output "usage: $Project  by=$By  files=$($files.Count)"
+if ($Json) { Write-Output (ConvertTo-Json @($out) -Depth 3); exit 0 }
+if (-not $out) { Write-Output "no turns found under $base (since $($sinceDate.ToString('yyyy-MM-dd')))"; exit 0 }
+Write-Output "usage: $Project  by=$By kind=$Kind since=$($sinceDate.ToString('yyyy-MM-dd'))  files=$($files.Count)"
 # Fixed-width rows: Format-Table wraps to the host width in a non-interactive shell and drops columns.
-$fmt = '{0,-36} {1,-5} {2,8} {3,6} {4,7} {5,9} {6,11} {7,11} {8,9} {9,9} {10,9} {11,10} {12,12} {13,11}'
-Write-Output ($fmt -f 'group', 'scope', 'sessions', 'turns', 'prompts', 'tool_uses', 'cached_in', 'uncached_in', 'output', 'mean_ctx', 'peak_ctx', 'in_per_out', 'out_per_tool', 'compactions')
+$fmt = '{0,-36} {1,-5} {2,8} {3,6} {4,7} {5,9} {6,11} {7,11} {8,9} {9,9} {10,9} {11,10} {12,12} {13,11} {14,7} {15,8}'
+Write-Output ($fmt -f 'group', 'scope', 'sessions', 'turns', 'prompts', 'tool_uses', 'cached_in', 'uncached_in', 'output', 'mean_ctx', 'peak_ctx', 'in_per_out', 'out_per_tool', 'compactions', 'span_h', 'active_h')
 foreach ($r in $out) {
-    Write-Output ($fmt -f $r.group, $r.scope, $r.sessions, $r.turns, $r.prompts, $r.tool_uses, $r.cached_in, $r.uncached_in, $r.output, $r.mean_ctx, $r.peak_ctx, $r.in_per_out, $r.out_per_tool, $r.compactions)
+    Write-Output ($fmt -f $r.group, $r.scope, $r.sessions, $r.turns, $r.prompts, $r.tool_uses, $r.cached_in, $r.uncached_in, $r.output, $r.mean_ctx, $r.peak_ctx, $r.in_per_out, $r.out_per_tool, $r.compactions, $r.span_h, $r.active_h)
 }

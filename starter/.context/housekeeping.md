@@ -94,7 +94,7 @@ When the user asks to run housekeeping:
 4. **Run Rule 2 archival check** — if any planning subfolder ≥30 files, propose batch archive.
 5. **Run Rule 3 wiki lint** — invoke the existing wiki lint operation from `workspaces/research/`. This already follows the propose-then-approve pattern.
 6. **Run Rule 4 reference review** — list files unused for 90+ days, propose archive.
-7. **Append a housekeep entry to `wiki/log.md`** with kind `housekeep`, a summary of what was changed, and the week's `mean_ctx` for main and sub from step 1. Every optimization adopted afterwards cites a before and after figure from this script.
+7. **Append a housekeep entry to `wiki/log.md`** with kind `housekeep`, a summary of what was changed, and the week's `mean_ctx` and `active_h` for main and sub from step 1 (`active_h` is the wall-clock figure dossiers cite). Every optimization adopted afterwards cites a before and after figure from this script.
 
 Housekeeping is a **proposal** workflow, not autonomous cleanup. Every action waits for approval.
 

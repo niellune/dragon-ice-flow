@@ -30,7 +30,7 @@ EVIDENCE: owed
 
 | Command | Does | Exit 0 when |
 |---|---|---|
-| `gates.ps1 -Lint gates/<id>.md` | Refuses gates that cannot fail | No lint finding |
+| `gates.ps1 -Lint gates/<id>.md` | Refuses gates that cannot fail; `-Strict` turns warnings into failures | No lint finding |
 | `gates.ps1 -Run gates/<id>.md` | Runs the gates **not yet met**, writes EVIDENCE lines, prints status | Every runnable gate met and nothing abandoned |
 | `gates.ps1 -Reverify gates/<id>.md` | Runs **every** runnable gate, met or not, and demotes failures | same |
 | `gates.ps1 -Status gates/<id>.md` | Recomputes from the file alone, no execution | No gate unmet and nothing abandoned |
@@ -61,6 +61,8 @@ Each refuses a gate that cannot fail or a ledger that cannot be traced:
 | hand tick | Any `- [x]` line inside a gate |
 | workspace flag | With `-WorkspaceRule`, a CHECK matching the command regex but not the flag regex |
 | abandon | An `ABANDON:` naming a gate that is not in the ledger, or with a reason too short to be a handoff |
+| tautological | A CHECK that only prints a literal equal to its own EXPECT (`Write-Output X` / `EXPECT: X`); it observes nothing |
+| mostly manual | *Warning:* more than half the gates have no CHECK. Fails only under `-Strict` |
 
 ## Standard gates
 
