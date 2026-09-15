@@ -1,25 +1,5 @@
-# src/ — Feature-Sliced Design
+# src/
 
-Frontend code is organized by **Feature-Sliced Design**. Full spec:
-[`reference/architecture/feature-sliced-design.md`](../reference/architecture/feature-sliced-design.md).
+Your application code. The layout, import boundaries and naming rules come from the stack pack applied at setup (`reference/stacks/<pack>/`, applied with `.claude/scripts/apply-stack.ps1 <pack>`); the pack's `layout/` folder is copied here and this README is replaced by the pack's own.
 
-## Layers (top → bottom)
-
-Imports may **only point downward**. A slice never imports a sibling slice.
-
-```
-app      → composition root: providers, router, global setup
-pages    → full screens, one slice per route
-widgets  → large composed UI blocks reused across pages
-features → things a user does (verbs): add-to-cart, auth-by-phone
-entities → business nouns (data + its UI): user, product
-shared   → business-agnostic reusable code: ui kit, api client, lib, config
-```
-
-`app` and `shared` have no business slices (`app` is one root; `shared` is split by segment).
-
-## Inside a slice — segments
-
-`ui` (components) · `model` (logic/state/types) · `api` (requests) · `lib` (helpers) · `config` (constants).
-
-Expose a slice's surface through its `index` barrel; import other slices only via *their* barrel.
+No pack applied yet: this folder stays empty and Claude asks before inventing a layout. Available packs: `reference/stacks/index.md`.

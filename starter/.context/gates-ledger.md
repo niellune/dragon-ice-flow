@@ -77,6 +77,7 @@ Every feature ledger starts with these; the spec adds feature-specific gates aft
 | zero CR | `git diff --name-only <baseline>..HEAD \| ForEach-Object { if (Select-String -Path $_ -Pattern '\r' -Quiet) { 'CR: ' + $_ } }; 'scanned'` | `^scanned$` |
 | ledger tests | `powershell -NoProfile -File .claude/scripts/tests/gates.tests.ps1` | `(\d+) run, \1 passed` (only for tasks that touch the runner) |
 | prose (tasks that write markdown) | `powershell -NoProfile -File .claude/scripts/unslop/unslop.ps1 <the files the task writes>` | `^unslop: 0 findings` |
+<!-- stack:gates -->
 
 ## Proofs on record
 

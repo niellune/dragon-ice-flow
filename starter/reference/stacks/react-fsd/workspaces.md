@@ -1,0 +1,2 @@
+## boundaries
+Refactors of `src/` must preserve the FSD boundaries: no upward or sibling-slice imports, every slice's public API behind its `index.ts` barrel, segments (`ui`, `model`, `api`, `lib`, `config`) kept to their purpose. "Move file to better location" means move it to the correct layer/slice/segment per `reference/stacks/react-fsd/architecture.md`. A refactor that changes a slice's barrel is a public-surface change and names every importer it touches.

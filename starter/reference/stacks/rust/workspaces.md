@@ -1,0 +1,2 @@
+## boundaries
+Refactors must preserve the crate seams: a member crate never gains a dependency on the root crate; a type that crosses a crate boundary keeps its public signature or the refactor names every caller it changes; feature-flagged code stays behind its flag and its lane. "Move file to better location" means the right crate and module per `reference/stacks/rust/conventions.md` §Layout. A refactor that touches `unsafe` re-states the `// SAFETY:` invariant it relies on.

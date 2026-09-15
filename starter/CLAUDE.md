@@ -39,7 +39,7 @@
 
 **`wiki/`** — LLM-maintained knowledge: `index.md`, `log.md` + `log/` (archived months), `entities/`, `concepts/`, `sources/`
 
-**`src/`** — your actual code. Frontend follows **Feature-Sliced Design**; spec in `reference/architecture/feature-sliced-design.md`
+**`src/`** — your actual code. Layout, boundaries and naming come from the applied stack pack (`reference/stacks/`; named in `STATE.md` → Stack & Versions)
 
 ## Routing Rule
 
@@ -55,7 +55,7 @@ Every fact lives in exactly one file. Other files point to it; they never copy i
 - Hard rules → `.context/rules.md`
 - Domain terms → `.context/glossary.md`
 - Project patterns → `reference/` · decisions of record → `reference/adr/`
-- Frontend architecture → `reference/architecture/feature-sliced-design.md`
+- Stack rules (layout, lanes, naming) → `reference/stacks/<pack>/`, applied into the anchors, never copied by hand
 - Accumulated knowledge from external sources → `wiki/`
 
 ## Authority Boundary

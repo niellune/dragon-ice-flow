@@ -3,9 +3,13 @@
 > Catalog of deep docs **you** wrote about *this* project. Authoritative for project
 > decisions and patterns. Loaded on demand — load only the named section, never the whole folder.
 
+## Stack packs
+
+- [`stacks/`](stacks/index.md) — one pack per technology stack (`react-fsd/`, `rust/`), applied at setup by `apply-stack.ps1` into the `<!-- stack:... -->` anchors. Shape and anchor contract: `stacks/_pack-shape.md`. The generic files carry no stack rules of their own.
+
 ## Architecture
 
-- [`architecture/feature-sliced-design.md`](architecture/feature-sliced-design.md) — how frontend code under `src/` is organized (layers, slices, segments, import rules). The canonical source; always-loaded files only carry a one-line pointer to it.
+*Stack-level architecture (layout, boundaries) lives in the applied pack's deep docs: `stacks/react-fsd/architecture.md`, `stacks/rust/conventions.md`. Project-level architecture (the map) starts in `STATE.md` → Architecture Snapshot and moves here as an index over section files once it outgrows a paragraph.*
 
 ## Decisions of record
 

@@ -25,9 +25,10 @@ Before any file write: follow `.context/task-workflow.md`. Refactors are *especi
 - Move file to better location
 - Replace prose comment with better names
 
-## FSD Boundaries
+## Architecture Boundaries
 
-Refactors of `src/` must **preserve Feature-Sliced Design boundaries**: don't introduce upward or sibling-slice imports, and keep each slice's public API behind its `index` barrel. "Move file to better location" means move it to the correct **layer/slice/segment** — see `reference/architecture/feature-sliced-design.md`.
+Refactors must **preserve the boundaries the applied stack pack defines** (layout, import direction, public surfaces). "Move file to better location" means move it to where the pack says it belongs. The pack's own boundary rules for this workspace:
+<!-- stack:boundaries -->
 
 ## Rule of Three
 

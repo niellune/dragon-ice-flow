@@ -18,5 +18,6 @@ Fill this in per project. Nothing else in this document needs editing.
 | Build command | _command_ |
 | Test command | _command_ |
 | Lint / typecheck command | _command_ |
+<!-- stack:binding -->
 
 Where this document says "the build", "the tests", or "the task format", it means the entries above.

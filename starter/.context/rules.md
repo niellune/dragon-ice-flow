@@ -2,7 +2,7 @@
 
 > Non-negotiables. If something here conflicts with a user request, surface the conflict — do not silently override.
 >
-> **Filling this file:** the bracketed `[...]` placeholders are prompts for the project owner, not instructions for Claude. **Delete any section that doesn't apply** to this project; don't leave empty brackets — they read as instructions and cause confusion.
+> **Filling this file:** the bracketed `[...]` placeholders are prompts for the project owner, not instructions for Claude. **Delete any section that doesn't apply** to this project; don't leave empty brackets — they read as instructions and cause confusion. Stack-specific rules (language, layout, lanes, naming) are not written here by hand: a stack pack from `reference/stacks/` fills the `<!-- stack:... -->` anchors when applied (`.claude/scripts/apply-stack.ps1 <pack>`).
 
 ## Non-Negotiables (always loaded)
 1. Never commit secrets, API keys, or `.env` files.
@@ -10,17 +10,17 @@
 3. Never delete files without explicit user confirmation.
 4. Never invent function/library names — verify they exist.
 5. Always read a file before editing it.
-6. Frontend code under `src/` follows **Feature-Sliced Design**: imports point downward only (`app → pages → widgets → features → entities → shared`); a slice never imports a sibling slice (share via `shared/` or `entities/`, or compose in a higher layer); import slices through their `index` barrel. Full spec: `reference/architecture/feature-sliced-design.md`.
+6. Code layout and import boundaries follow the applied stack pack (`STATE.md` → Stack & Versions names it). No stack pack applied means no layout rule yet; ask before inventing one.
 
 ## Code Style
-- **Language conventions:** [e.g., TypeScript strict mode, no `any`]
-- **Formatting:** [e.g., Prettier defaults, 2-space indent]
-- **Imports:** [e.g., absolute paths from `@/`]
 - **Comments:** Only when *why* is non-obvious. Never explain *what*.
+<!-- stack:code-style -->
 
 ## Architecture
-- Frontend (`src/`) is organized by Feature-Sliced Design. Decide a file's **layer → slice → segment** before writing it. Canonical spec & decision guide: `reference/architecture/feature-sliced-design.md`.
-- Non-UI code (server, scripts, infra) is not governed by FSD.
+<!-- stack:architecture -->
+
+## Naming
+<!-- stack:naming -->
 
 ## Security
 - All user input is untrusted until validated.
@@ -31,8 +31,9 @@
 [If applicable: GDPR, HIPAA, SOC2, etc.]
 
 ## Testing
-- [e.g., New features need a test. Bug fixes need a regression test.]
-- [e.g., No `skip` or `only` in committed test files.]
+- New features need a test. Bug fixes need a regression test.
+- No skipped or focused tests in committed files.
+<!-- stack:testing -->
 
 ## Git / PR Conventions
 - Commit messages: `[task-id] short imperative` (e.g. `feat-012 add dashboard export button`)

@@ -36,7 +36,7 @@ your-project/
 ├── .claude/
 │   ├── settings.json      ← registers the two hooks below
 │   ├── hooks/             ← gate-check.ps1 (XML gate), budget-check.ps1 (board budgets)
-│   └── scripts/           ← gates.ps1 (verification ledger), usage.ps1 (token consumption), unslop/ (prose scanner + hook), tests/
+│   └── scripts/           ← gates.ps1 (verification ledger), usage.ps1 (token consumption), unslop/ (prose scanner + hook), apply-stack.ps1 (stack packs), tests/
 │
 ├── .context/
 │   ├── identity.md
@@ -55,7 +55,8 @@ your-project/
 ├── planning/              ← stories, specs, plans (each with index.md), backlog.md,
 │                             rounds/<id>/ (per-role round files), done-plans/ (dossiers), _archive/
 ├── gates/                 ← one ledger per feature in flight (created by the spec round)
-├── reference/             ← deep docs YOU wrote
+├── reference/             ← deep docs YOU wrote · adr/ (decisions of record)
+│   └── stacks/            ← stack packs (react-fsd, rust); apply one at setup with apply-stack.ps1
 │
 ├── raw/                   ← immutable sources
 ├── wiki/                  ← LLM-maintained knowledge (index, log + log/YYYY-MM.md, entities, concepts, sources)

@@ -41,6 +41,7 @@
 ## Stack & Versions
 
 *Pinned versions that matter. Update on dependency changes.*
+- Stack pack: none
 
 - [language/runtime]: [version]
 - [framework]: [version]

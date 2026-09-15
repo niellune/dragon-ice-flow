@@ -36,6 +36,19 @@ The scripts are Windows PowerShell 5.1 and ASCII-only. On macOS or Linux install
 
 Open `CLAUDE.md` and fill the four lines under **Project Identity**: Name, One-line purpose, Stage, Primary stack.
 
+## Step 2b — Choose a stack pack (2 min)
+
+The template ships stack-free: `.context/rules.md`, the glossary, the routing table, the refactoring workspace, the pipeline binding and the standard gates each carry a `<!-- stack:... -->` anchor, and `src/` is a README. A stack pack fills them mechanically:
+
+```
+powershell -NoProfile -File .claude/scripts/apply-stack.ps1 react-fsd
+powershell -NoProfile -File .claude/scripts/apply-stack.ps1 rust
+```
+
+Available packs and what each carries: `reference/stacks/index.md`; the pack shape and anchor contract: `reference/stacks/_pack-shape.md`. The script fills the anchors, copies the pack's `layout/` into `src/`, sets the `Stack pack:` line in `STATE.md`, and adds a log entry; running it twice changes nothing. Edit the applied rows in your project when your tooling differs from the pack's defaults; `apply-stack.ps1 -Check` then lists the divergence, which is expected. To swap packs later, pass `-Replace`. No pack that fits? Copy a pack folder, keep every file name, replace the content.
+
+Self-test: `powershell -NoProfile -File .claude/scripts/tests/apply-stack.tests.ps1` should end with `N run, N passed`.
+
 ## Step 3 — Fill `STATE.md` (10 min)
 
 Current Focus, Architecture Snapshot, Stack & Versions, Environments. Skip Recently Shipped / Known Issues while they're empty. `STATE.md` is overwrite-freely — don't polish it.
