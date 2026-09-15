@@ -28,6 +28,7 @@ Workspaces frame a whole task. Skills are invoked briefly within one, then you r
 | Deciding where code goes — which layer/slice/segment a file belongs in | `reference/architecture/feature-sliced-design.md` |
 | Running the board — "proceed", "go", "next", "run the board", dispatching a pipeline role | `.context/pipeline/03-orchestration.md` only (the index is `.context/multi-agent-pipeline.md`; do not load the other sections). No source, no map, no spec body. |
 | De-slopping prose — "unslop", "humanize", "does this read like AI" | `skills/unslop/SKILL.md` |
+| Being interviewed — "grill me", "interview me", "stress-test my thinking" | `skills/grill/SKILL.md` |
 
 ## Wiki Integration Rules
 

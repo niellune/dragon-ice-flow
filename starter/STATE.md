@@ -4,6 +4,10 @@
 >
 > Updated by Claude after task completion. Should always reflect the project as it is *today*.
 
+**NEXT ACTION:** [the one thing the next session does first — a task id, a decision to take, or a slot to fill. One line.]
+
+**Owner-owed, any order:** [manual gates and sittings only the owner can do, or "none". Checklists live in the dossiers.]
+
 ## Current Focus
 
 [What we're working on right now. One paragraph max. Update when focus shifts.]

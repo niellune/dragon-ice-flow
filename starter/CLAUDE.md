@@ -27,7 +27,7 @@
 
 **`workspaces/`** — task-type contexts: `feature-development/`, `debugging/`, `refactoring/`, `planning/`, `research/`
 
-**`skills/`** — on-demand thinking: `brainstorm/` · `unslop/` (prose audit; its scanner is also the record hook)
+**`skills/`** — on-demand thinking: `brainstorm/` · `grill/` · `unslop/` (prose audit; its scanner is also the record hook)
 
 **`planning/`** — `stories/`, `specs/`, `plans/` (each with `index.md`) · `backlog.md` · `rounds/<id>/` · `done-plans.md` + `done-plans/` · `_archive/`
 
@@ -54,8 +54,8 @@ Every fact lives in exactly one file. Other files point to it; they never copy i
 - Identity & voice → `.context/identity.md`
 - Hard rules → `.context/rules.md`
 - Domain terms → `.context/glossary.md`
-- Project decisions, project-specific patterns → `reference/`
-- Frontend architecture (Feature-Sliced Design) → `reference/architecture/feature-sliced-design.md`
+- Project patterns → `reference/` · decisions of record → `reference/adr/`
+- Frontend architecture → `reference/architecture/feature-sliced-design.md`
 - Accumulated knowledge from external sources → `wiki/`
 
 ## Authority Boundary

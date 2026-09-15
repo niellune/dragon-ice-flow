@@ -20,7 +20,7 @@ Reads, brainstorming, and "let me sketch this in chat" are fine. Committing arti
 - The user is describing something to build but the scope isn't clear yet
 - A feature involves multiple users, edge cases, or trade-offs that warrant writing down
 - The work crosses 3+ files and needs sequencing
-- You're about to enter `feature-development` but the "what" is fuzzy
+- You're about to enter `feature-development` but the "what" is fuzzy. If the fuzziness lives in the *user's head* (intent the code cannot answer), offer a `grill` session first (`skills/grill/SKILL.md`)
 
 ## When NOT to Use This Workspace
 

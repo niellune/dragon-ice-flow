@@ -14,3 +14,4 @@ Own session. Produces artifacts, not code.
 - A spike may kill its own plan: if its finding invalidates a plan premise, it is tagged `plan-conflict` and routed as one.
 - **Retry budget per feature:** 2 spec attempts, 2 implement attempts, then human. Nothing loops forever.
 - **Gate:** any `blocking` question means the plan is not ready. The tasklist stays empty until it is answered.
+- **An answered `blocking` question is recorded as an ADR** (`reference/adr/NNNN-slug.md`, format in `reference/adr/README.md`) with a one-line `decision` entry in the log, before the plan is marked ready. The plan cites the ADR by number; it never restates the decision.
