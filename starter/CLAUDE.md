@@ -6,11 +6,11 @@
 
 **Default: plain conversation.** Short sentences, no XML, minimal headers. Answer like a thoughtful colleague.
 
-**Structure fires on intent.** When the user asks for a write action ("add a button", "fix this bug", "create the spec") or when a decision is being committed, switch to the XML task wrapper from `.context/task-workflow.md`. The gate is non-negotiable; the conversation around it can stay light.
+**Structure fires on intent.** When the user asks for a write action or a decision is being committed, switch to the XML task wrapper from `.context/task-workflow.md`. The gate is non-negotiable; the conversation around it can stay light.
 
-**Depth is opt-in.** Trigger words: "tell me more", "explain", "why", "details", "show me how", "walk me through it". Without those signals, give the short answer.
+**Depth is opt-in.** Trigger words: "tell me more", "explain", "why", "walk me through it". Without those signals, give the short answer.
 
-**Silent workspace loading.** When the user's intent maps to a workspace (a bug → debugging, a new feature → feature-development, ingesting a doc → research), load that workspace silently. Don't announce *"I've loaded the debugging workspace"*. The workspace rules apply; the user just sees Claude being helpful.
+**Silent workspace loading.** When the user's intent maps to a workspace (a bug → debugging, a new feature → feature-development, ingesting a doc → research), load it silently and don't announce it.
 
 ## Project Identity
 
@@ -27,19 +27,19 @@
 
 **`workspaces/`** — task-type contexts: `feature-development/`, `debugging/`, `refactoring/`, `planning/`, `research/`
 
-**`skills/`** — on-demand thinking: `brainstorm/` · `unslop/` (prose audit and repair; scanner in `.claude/scripts/unslop/`, wired as a PostToolUse hook on records)
+**`skills/`** — on-demand thinking: `brainstorm/` · `unslop/` (prose audit; its scanner is also the record hook)
 
 **`planning/`** — `stories/`, `specs/`, `plans/` (each with `index.md`) · `backlog.md` · `rounds/<id>/` · `done-plans.md` + `done-plans/` · `_archive/`
 
-**`gates/`** — one verification ledger per feature in flight, nothing else
+**`gates/`** — one verification ledger per feature in flight
 
 **`reference/`** — deep docs YOU wrote (loaded on demand)
 
 **`raw/`** — immutable source documents (PDFs, transcripts, articles)
 
-**`wiki/`** — LLM-maintained knowledge: `index.md`, `log.md` (current month; older in `log/YYYY-MM.md`), `entities/`, `concepts/`, `sources/`
+**`wiki/`** — LLM-maintained knowledge: `index.md`, `log.md` + `log/` (archived months), `entities/`, `concepts/`, `sources/`
 
-**`src/`** — your actual code. Frontend is organized by **Feature-Sliced Design** (`app → pages → widgets → features → entities → shared`); spec in `reference/architecture/feature-sliced-design.md`
+**`src/`** — your actual code. Frontend follows **Feature-Sliced Design**; spec in `reference/architecture/feature-sliced-design.md`
 
 ## Routing Rule
 
