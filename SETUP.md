@@ -24,13 +24,13 @@ The XML task gate is enforced mechanically, not on trust. Check it before anythi
 1. Open the project in Claude Code. Approve the hooks when prompted (`.claude/settings.json` registers a PreToolUse gate hook and a PostToolUse budget hook).
 2. Smoke test: ask Claude to make a trivial edit to a file under `src/` *without* approving an XML task. The write should be **blocked** with a "Gate closed" message.
 3. If it isn't blocked: confirm `.claude/settings.json` exists (not renamed), and that PowerShell can run `.claude/hooks/gate-check.ps1`.
-4. Budget hook smoke test: `powershell -NoProfile -File .claude/hooks/budget-check.ps1 -Path .claude/scripts/tests/fixtures/over-budget/TaskList.md` should print `TaskList.md:3 is 276 chars; budget 240` and exit 1. That is the same refusal Claude sees when a board row grows past its budget.
-5. Ledger runner self-test: `powershell -NoProfile -File .claude/scripts/tests/gates.tests.ps1` should end with `N run, N passed`.
-6. Prose scanner self-test: `powershell -NoProfile -File .claude/scripts/tests/unslop.tests.ps1` should end with `N run, N passed`. The same scanner runs as the second PostToolUse hook on records (`planning/done-plans/`, `wiki/*.md`, `reference/`, `.context/`) and refuses an edit that reads like assistant prose; `skills/unslop/SKILL.md` says how to repair one, and `.claude/scripts/unslop/rules.ps1` is where a false positive gets fixed.
+4. Budget hook smoke test: `sh .claude/run-ps.sh .claude/hooks/budget-check.ps1 -Path .claude/scripts/tests/fixtures/over-budget/TaskList.md` should print `TaskList.md:3 is 276 chars; budget 240` and exit 1. That is the same refusal Claude sees when a board row grows past its budget.
+5. Ledger runner self-test: `sh .claude/run-ps.sh .claude/scripts/tests/gates.tests.ps1` should end with `N run, N passed`.
+6. Prose scanner self-test: `sh .claude/run-ps.sh .claude/scripts/tests/unslop.tests.ps1` should end with `N run, N passed`. The same scanner runs as the second PostToolUse hook on records (`planning/done-plans/`, `wiki/*.md`, `reference/`, `.context/`) and refuses an edit that reads like assistant prose; `skills/unslop/SKILL.md` says how to repair one, and `.claude/scripts/unslop/rules.ps1` is where a false positive gets fixed.
 
 Sentinel lifecycle (Claude manages this, but you should recognize it): approving an XML task → `.claude/gate-open` is created → task executes and commits → sentinel deleted. A sentinel left behind means the gate is silently open — delete the file.
 
-The scripts are Windows PowerShell 5.1 and ASCII-only. On macOS or Linux install `pwsh` and change `powershell` to `pwsh` in `.claude/settings.json`; the scripts run unchanged.
+**Prerequisite, all platforms:** PowerShell. macOS and Linux need PowerShell 7 (`pwsh`, https://aka.ms/powershell); Windows works with the built-in Windows PowerShell 5.1 or with PowerShell 7. Every hook runs through `sh .claude/run-ps.sh <script>`, which picks `pwsh` when present and falls back to `powershell`, so `.claude/settings.json` never names a binary and needs no edit per OS. Run any script by hand the same way: `sh .claude/run-ps.sh .claude/scripts/gates.ps1 -Status gates/<id>.md`. The scripts are ASCII-only and spawn child shells as the runtime they are running in.
 
 ## Step 2 — Project identity (5 min)
 
@@ -41,13 +41,13 @@ Open `CLAUDE.md` and fill the four lines under **Project Identity**: Name, One-l
 The template ships stack-free: `.context/rules.md`, the glossary, the routing table, the refactoring workspace, the pipeline binding and the standard gates each carry a `<!-- stack:... -->` anchor, and `src/` is a README. A stack pack fills them mechanically:
 
 ```
-powershell -NoProfile -File .claude/scripts/apply-stack.ps1 react-fsd
-powershell -NoProfile -File .claude/scripts/apply-stack.ps1 rust
+sh .claude/run-ps.sh .claude/scripts/apply-stack.ps1 react-fsd
+sh .claude/run-ps.sh .claude/scripts/apply-stack.ps1 rust
 ```
 
 Available packs and what each carries: `reference/stacks/index.md`; the pack shape and anchor contract: `reference/stacks/_pack-shape.md`. The script fills the anchors, copies the pack's `layout/` into `src/`, sets the `Stack pack:` line in `STATE.md`, and adds a log entry; running it twice changes nothing. Edit the applied rows in your project when your tooling differs from the pack's defaults; `apply-stack.ps1 -Check` then lists the divergence, which is expected. To swap packs later, pass `-Replace`. No pack that fits? Copy a pack folder, keep every file name, replace the content.
 
-Self-test: `powershell -NoProfile -File .claude/scripts/tests/apply-stack.tests.ps1` should end with `N run, N passed`.
+Self-test: `sh .claude/run-ps.sh .claude/scripts/tests/apply-stack.tests.ps1` should end with `N run, N passed`.
 
 ## Step 3 — Fill `STATE.md` (10 min)
 
@@ -81,7 +81,7 @@ Only the table gets edited; the rules themselves stay generic. The pipeline's op
 
 ## Step 6b — Take a usage baseline (1 min, after the first week)
 
-`powershell -NoProfile -File .claude/scripts/usage.ps1 -By week` reads the Claude Code transcripts for this project and prints main-vs-subagent consumption. Paste the `mean_ctx` figures into your first `housekeep` log entry; every later optimization cites a before and after from this script.
+`sh .claude/run-ps.sh .claude/scripts/usage.ps1 -By week` reads the Claude Code transcripts for this project and prints main-vs-subagent consumption. Paste the `mean_ctx` figures into your first `housekeep` log entry; every later optimization cites a before and after from this script.
 
 ## Step 7 — Reset the wiki log (1 min, optional)
 

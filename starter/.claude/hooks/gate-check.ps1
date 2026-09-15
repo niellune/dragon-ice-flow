@@ -25,7 +25,7 @@ foreach ($prefix in $gated) {
 }
 if (-not $isGated) { exit 0 }
 
-if (Test-Path (Join-Path $projectDir '.claude\gate-open')) { exit 0 }
+if (Test-Path (Join-Path (Join-Path $projectDir '.claude') 'gate-open')) { exit 0 }
 
 [Console]::Error.WriteLine("Gate closed: '$rel' is under the XML task gate (src/, reference/, .context/) and no approved task is open. Write the XML task per .context/task-workflow.md, get user approval, then create the sentinel: echo approved > .claude/gate-open. Delete the sentinel after the task's commit.")
 exit 2

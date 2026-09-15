@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .claude/hooks/gate-check.ps1"
+            "command": "sh .claude/run-ps.sh .claude/hooks/gate-check.ps1"
           }
         ]
       }
@@ -17,11 +17,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .claude/hooks/budget-check.ps1"
+            "command": "sh .claude/run-ps.sh .claude/hooks/budget-check.ps1"
           },
           {
             "type": "command",
-            "command": "powershell -NoProfile -ExecutionPolicy Bypass -File .claude/scripts/unslop/unslop.ps1 -Hook"
+            "command": "sh .claude/run-ps.sh .claude/scripts/unslop/unslop.ps1 -Hook"
           }
         ]
       }

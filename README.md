@@ -34,7 +34,8 @@ your-project/
 │
 ├── .gitattributes         ← LF pinned (line 1: * text=auto eol=lf)
 ├── .claude/
-│   ├── settings.json      ← registers the two hooks below
+│   ├── settings.json      ← registers the hooks below, all through run-ps.sh
+│   ├── run-ps.sh          ← picks pwsh (PowerShell 7, any OS) or Windows PowerShell
 │   ├── hooks/             ← gate-check.ps1 (XML gate), budget-check.ps1 (board budgets)
 │   └── scripts/           ← gates.ps1 (verification ledger), usage.ps1 (token consumption), unslop/ (prose scanner + hook), apply-stack.ps1 (stack packs), tests/
 │

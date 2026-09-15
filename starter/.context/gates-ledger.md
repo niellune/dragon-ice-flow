@@ -19,10 +19,11 @@ EVIDENCE: owed
 
 - A gate is **met** only when CHECK exited 0 **and** the output matched EXPECT, **and** the EVIDENCE digest equals the digest of the current CHECK+EXPECT. Editing either flips the gate to unmet without a re-run.
 - EVIDENCE lines are written only by `gates.ps1 -Run`. A hand-ticked box is not evidence; the linter rejects it and `-Status` reports the gate unmet.
-- MANUAL gates have no CHECK and are reported as **owed** until the owner writes `EVIDENCE: owner-confirmed <date> <who>`.
+- MANUAL gates have no CHECK and are reported as **owed** until the owner writes `EVIDENCE: owner-confirmed <date> <who>`. Every gate id is `G<n>`, manual ones included; a heading with another prefix (`O1`, `L1`) is not a gate and its lines are attributed to the gate above it.
 - EXPECT for a test lane pins self-consistency, never a count: `(\d+) run, \1 passed`, not `12 passed`.
 - The ledger name is the task id (`feat|bug|ref|res|story|spec|plan-NNN`). The linter refuses anything else.
 - Keep CHECK and EXPECT ASCII. Output is captured through the console code page, so a non-ASCII character in the output (an em dash, say) may arrive as `-` or `?` and never match.
+- A CHECK runs in the PowerShell that runs the runner (`pwsh` on macOS/Linux, `pwsh` or Windows PowerShell on Windows) from the project root. Keep it portable: PowerShell cmdlets and the stack's own CLI, never `cmd`, `taskkill`, backslash paths or `$env:TEMP`; spawn a child PowerShell as `(Get-Process -Id $PID).Path`, never by name.
 - `ABANDON: <id> <reason>` at column 1, only when the outcome is genuinely impossible in the authorized task (needs the owner, hardware, a deploy). The gate is reported **owed (abandoned)**, never run, and the ledger exits 1: a visible handoff, not a pass. Closeout turns it into `gate-owed? yes` on the board row and a line under **Owed** in the dossier.
 - A CHECK past the timeout is killed and recorded `exit=timeout`, unmet. Output over 1 MiB is unmet (overflow), never truncated into a pass; make the CHECK print less (a summary line, `| Select-Object -Last 5`).
 
@@ -73,10 +74,10 @@ Every feature ledger starts with these; the spec adds feature-specific gates aft
 | unit lane | _binding: test command_ | `(\d+) run, \1 passed` (or the lane's own self-consistent line) |
 | lint | _binding: lint / typecheck command_ | the tool's clean line |
 | format | _binding: format check_ | the tool's clean line |
-| board budget | `powershell -NoProfile -File .claude/hooks/budget-check.ps1 -All` | `^budget-check: ok` |
+| board budget | `sh .claude/run-ps.sh .claude/hooks/budget-check.ps1 -All` | `^budget-check: ok` |
 | zero CR | `git diff --name-only <baseline>..HEAD \| ForEach-Object { if (Select-String -Path $_ -Pattern '\r' -Quiet) { 'CR: ' + $_ } }; 'scanned'` | `^scanned$` |
-| ledger tests | `powershell -NoProfile -File .claude/scripts/tests/gates.tests.ps1` | `(\d+) run, \1 passed` (only for tasks that touch the runner) |
-| prose (tasks that write markdown) | `powershell -NoProfile -File .claude/scripts/unslop/unslop.ps1 <the files the task writes>` | `^unslop: 0 findings` |
+| ledger tests | `sh .claude/run-ps.sh .claude/scripts/tests/gates.tests.ps1` | `(\d+) run, \1 passed` (only for tasks that touch the runner) |
+| prose (tasks that write markdown) | `sh .claude/run-ps.sh .claude/scripts/unslop/unslop.ps1 <the files the task writes>` | `^unslop: 0 findings` |
 <!-- stack:gates -->
 
 ## Proofs on record

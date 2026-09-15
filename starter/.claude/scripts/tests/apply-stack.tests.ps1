@@ -13,7 +13,7 @@ function Assert([string]$name, [bool]$cond, [string]$detail = '') { $script:run+
 function Invoke-Apply([string[]]$argv, [string]$dir) {
     $ErrorActionPreference = 'Continue'
     $env:CLAUDE_PROJECT_DIR = $dir
-    $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $apply $argv 2>&1 | Out-String)
+    $out = (& (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $apply $argv 2>&1 | Out-String)
     $ErrorActionPreference = 'Stop'
     return @{ Exit = $LASTEXITCODE; Out = $out }
 }

@@ -14,12 +14,13 @@
 
 - Your outputs go to the files your brief names. You commit them yourself, **by pathspec** (`git add <paths>`). Never `git add -A`, never renormalize — the index may be shared with another session.
 - Files are LF. Before returning, run the zero-CR check on every file you touched:
-  `powershell -NoProfile -Command "git diff --name-only HEAD | ForEach-Object { if (Select-String -Path $_ -Pattern '\r' -Quiet) { 'CR: ' + $_ } }"` — empty output is the pass.
+  `git diff --name-only HEAD | xargs -r grep -lI $'\r'` (bash, any OS) — empty output is the pass.
 - Board rows and always-load files are budgeted; the PostToolUse hook refuses over-budget writes. Trim the row, not the rule (`.context/task-workflow.md ## Closeout Rule`).
 - Phantom modified files with empty diffs are a stale stat cache: `git update-index --refresh -- <those files>`. Never sweep them into a commit.
 
 ## Box facts
 
+- Hooks and scripts are PowerShell, run through `sh .claude/run-ps.sh <script>` which picks `pwsh` (PowerShell 7, any OS) or Windows PowerShell. Run a script by hand the same way; never assume `cmd`, backslash paths or `$env:TEMP`.
 - The build, tests and lint (Project binding in the pipeline doc) are **foreground-only and serialized**: one working tree, one build directory. Never run them while another role's run is in flight.
 - Never background any job from a subagent. You get no completion callback; the job outlives your report.
 - Verification runs the ledger (`gates/<feature-id>.md`, format in `.context/gates-ledger.md`); the implementer runs it once, verify-a re-verifies once, verify-b reads status only. Three full-lane runs on one commit buy nothing the first did not.

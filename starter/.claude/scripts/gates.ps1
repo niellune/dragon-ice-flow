@@ -90,6 +90,25 @@ function Write-Evidence($ledger, $g, [string]$line) {
     $ledger.Lines = $lines
 }
 
+function Stop-ProcessTree([int]$rootPid) {
+    # Kill a process and everything it spawned. Windows: taskkill /T. Elsewhere: walk children with pgrep, kill leaves first.
+    if ($env:OS -eq 'Windows_NT') {
+        $taskkill = Join-Path (Join-Path $env:SystemRoot 'System32') 'taskkill.exe'
+        if (Test-Path $taskkill) { $null = & $taskkill /PID $rootPid /T /F 2>&1 }
+        try { Stop-Process -Id $rootPid -Force -ErrorAction SilentlyContinue } catch {}
+        return
+    }
+    $stack = New-Object System.Collections.Stack; $order = @()
+    $stack.Push($rootPid)
+    while ($stack.Count -gt 0) {
+        $cur = $stack.Pop(); $order += $cur
+        $kids = @(& pgrep -P $cur 2>$null | ForEach-Object { [int]$_ })
+        foreach ($k in $kids) { $stack.Push($k) }
+    }
+    [array]::Reverse($order)
+    foreach ($id in $order) { $null = & kill -9 $id 2>$null }
+}
+
 function Invoke-Check([string]$check) {
     # The CHECK runs in a child powershell via -EncodedCommand (verbatim; -Command would strip inner quotes),
     # with stdout+stderr redirected to temp files so a timeout can kill it without a pipe deadlock.
@@ -97,14 +116,13 @@ function Invoke-Check([string]$check) {
     $outFile = [IO.Path]::GetTempFileName(); $errFile = [IO.Path]::GetTempFileName()
     $code = 1; $timedOut = $false
     try {
-        $p = Start-Process -FilePath 'powershell' -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $enc) `
+        # The CHECK runs in the same PowerShell this runner is running in (pwsh or Windows PowerShell).
+        $psExe = (Get-Process -Id $PID).Path
+        $p = Start-Process -FilePath $psExe -ArgumentList @('-NoProfile', '-ExecutionPolicy', 'Bypass', '-EncodedCommand', $enc) `
             -WorkingDirectory $projectDir -RedirectStandardOutput $outFile -RedirectStandardError $errFile -NoNewWindow -PassThru
         if (-not $p.WaitForExit($TimeoutSeconds * 1000)) {
             $timedOut = $true
-            # Kill the whole process tree: a test runner the CHECK spawned must not outlive the gate.
-            $taskkill = Join-Path $env:SystemRoot 'System32\taskkill.exe'
-            if (Test-Path $taskkill) { $null = & $taskkill /PID $p.Id /T /F 2>&1 }
-            try { Stop-Process -Id $p.Id -Force -ErrorAction SilentlyContinue } catch {}
+            Stop-ProcessTree $p.Id   # a test runner the CHECK spawned must not outlive the gate
             try { $p.WaitForExit(5000) | Out-Null } catch {}
         }
         if (-not $timedOut) { $code = $p.ExitCode; if ($null -eq $code) { $code = 0 } }

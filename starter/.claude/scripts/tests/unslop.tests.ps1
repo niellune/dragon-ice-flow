@@ -17,8 +17,8 @@ function Assert([string]$name, [bool]$cond, [string]$detail = '') {
 function Invoke-Unslop([string[]]$argv, [string]$projectDir = $root, [string]$stdin = $null) {
     $ErrorActionPreference = 'Continue'
     $env:CLAUDE_PROJECT_DIR = $projectDir
-    if ($null -ne $stdin) { $out = ($stdin | & powershell -NoProfile -ExecutionPolicy Bypass -File $unslop $argv 2>&1 | Out-String) }
-    else { $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $unslop $argv 2>&1 | Out-String) }
+    if ($null -ne $stdin) { $out = ($stdin | & (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $unslop $argv 2>&1 | Out-String) }
+    else { $out = (& (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $unslop $argv 2>&1 | Out-String) }
     $ErrorActionPreference = 'Stop'
     return @{ Exit = $LASTEXITCODE; Out = $out }
 }

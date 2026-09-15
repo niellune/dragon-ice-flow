@@ -16,7 +16,7 @@ function Assert([string]$name, [bool]$cond, [string]$detail = '') {
 }
 function Invoke-Gates([string[]]$argv) {
     $ErrorActionPreference = 'Continue'
-    $out = (& powershell -NoProfile -ExecutionPolicy Bypass -File $gates $argv 2>&1 | Out-String)
+    $out = (& (Get-Process -Id $PID).Path -NoProfile -ExecutionPolicy Bypass -File $gates $argv 2>&1 | Out-String)
     $ErrorActionPreference = 'Stop'
     return @{ Exit = $LASTEXITCODE; Out = $out }
 }
@@ -141,7 +141,7 @@ Assert 'lint: mostly-manual fails under -Strict' ($r.Exit -ne 0) $r.Out
 $led8 = Copy-Fixture 'tree-kill/ref-913.md'
 $r = Invoke-Gates @('-Run', $led8, '-TimeoutSeconds', '2')
 Start-Sleep -Seconds 1
-$lingering = @(Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'tree-kill-marker-7f3a' }).Count
+$lingering = if ($env:OS -eq 'Windows_NT') { @(Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'tree-kill-marker-7f3a' }).Count } else { @(& pgrep -f 'tree-kill-marker-7f3a' 2>$null).Count }
 Assert 'timeout: grandchild process does not outlive the gate' ($r.Exit -ne 0 -and $lingering -eq 0) ("lingering=$lingering " + $r.Out)
 
 Remove-Item -Recurse -Force $tmp

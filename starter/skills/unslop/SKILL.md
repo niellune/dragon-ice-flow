@@ -21,7 +21,7 @@
 
 ### 1. Audit (default) — report, write nothing
 
-1. Run the scanner on the files named: `powershell -NoProfile -File .claude/scripts/unslop/unslop.ps1 <paths>`. Directories walk `*.md`.
+1. Run the scanner on the files named: `sh .claude/run-ps.sh .claude/scripts/unslop/unslop.ps1 <paths>`. Directories walk `*.md`.
 2. Read the same files for what a regex cannot see: a recap that restates its own section; praise with no measurement behind it; a vague transformation where the diff would name a function; a hedge that carries no meaning; a moral drawn at the end of a finding.
 3. Report per the template. Every item names a line. No edits.
 
