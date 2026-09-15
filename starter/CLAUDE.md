@@ -43,9 +43,9 @@
 
 ## Routing Rule
 
-Before doing anything, read `CONTEXT.md` to find which workspace applies. Then load only that workspace's `CONTEXT.md` and the specific files it points to.
+Read `CONTEXT.md` first; load only the workspace it names and the files that workspace points to.
 
-**Do NOT** load the entire `reference/` folder. **Do NOT** load the whole `wiki/` — always start with `wiki/index.md` and drill in.
+**Never** load all of `reference/` or `wiki/`; start at `wiki/index.md` and drill in.
 
 ## Canonical Sources (the One-Place Rule)
 
