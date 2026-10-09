@@ -54,4 +54,8 @@ Sentinel lifecycle:
 2. Execute the task, verify, commit.
 3. Delete the sentinel: `rm .claude/gate-open` (or `Remove-Item`). Never leave it open between tasks.
 
+Only the main session owns the sentinel. A subagent's call (one carrying `agent_id`) that writes `.claude/gate-open`, or a Bash command naming it, is blocked by the same hook; Bash reaches it through `.claude/hooks/sentinel-guard.sh`, which starts PowerShell only when the command mentions `gate-open`. A subagent that hits a closed gate reports back; it never opens the gate itself.
+
+Delegated runs (`.context/pipeline/03-orchestration.md`): the main session opens the gate when the human approves the plan, before the first dispatch, and deletes it after closeout's final commit at plan close. The roles write under the open gate; none of them touches the sentinel.
+
 The sentinel is gitignored. If the hook blocks a write you believe is exempt, check the "Which Gate Covers What" table in `task-workflow.md` — bookkeeping files are outside the gated paths by design.

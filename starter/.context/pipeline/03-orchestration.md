@@ -17,6 +17,8 @@ Read .context/briefs/<role>.md first, then .context/briefs/_common.md.
 
 The XML task is the spec agent's output, written into the plan file; the orchestrator forwards it by pointer, never pasted, never edited.
 
+**The gate is the orchestrator's.** It opens `.claude/gate-open` on plan approval and deletes it after closeout's final commit; subagents are hook-blocked from the sentinel. Lifecycle → `.context/task-workflow-appendix.md ## Enforcement (hook)`.
+
 **Dispatch, then wait.** The subagent's report is the only completion signal. **Never poll**: no loops on status, diff, or process list; no "helping" reads while a round is out. One feature, one round, one subagent at a time.
 
 - Never answer another agent's open questions. Route them.
