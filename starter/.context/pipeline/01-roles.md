@@ -10,4 +10,6 @@
 | Verify — intent | TIER-2, always, regardless of risk | Spec vs intent |
 | Closeout | TIER-3 subagent | Commit, docs, apply map delta, housekeeping |
 
+**UTILITY is not a role.** The optional `UTILITY` slot in the binding runs chores outside this table: a throwaway probe (a live hook check), a read-only search, a ledger `-Status` read. It never fills a role above and never writes a tracked file. Moving a role to a cheaper tier is the verify-cost review's call (`08-cost-rule.md`), not a dispatch choice.
+
 **One feature at a time.** There is a single working tree and a single build workspace — parallel features collide on commits and builds, not just on the wiki. This does not relax even if wiki locking is added.

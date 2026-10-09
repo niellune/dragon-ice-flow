@@ -7,6 +7,7 @@ Fill this in per project. Nothing else in this document needs editing.
 | `TIER-1` — highest capability, used sparingly | _model_ |
 | `TIER-2` — strong, used at both boundaries | _model_ |
 | `TIER-3` — efficient, used on the loop | _model_ |
+| `UTILITY` — cheapest, optional; chores outside the roles | _model (optional)_ |
 | Task format | `.context/task-workflow.md` |
 | Closeout dossier format | `planning/done-plans/_dossier-template.md` |
 | Gate ledger | `gates/<feature-id>.md` · format `.context/gates-ledger.md` · runner `.claude/scripts/gates.ps1` |
